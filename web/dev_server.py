@@ -13,6 +13,13 @@ WEB_DIR = Path(__file__).resolve().parent
 PORT = 8000
 SPEAK_EVERY_S = 5.0
 _last_speak = 0.0
+_tick = 0
+# Cycle alerts so tones can be tested on the phone.
+MOCK_REPLIES = [
+    ("Hello from the mock server", "none"),
+    ("Mock warning", "warn"),
+    ("Mock stop. Obstacle ahead.", "stop"),
+]
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -38,7 +45,7 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_POST(self):
-        global _last_speak
+        global _last_speak, _tick
         body = self.rfile.read(int(self.headers.get("Content-Length") or 0))
 
         if self.path == "/frame":
@@ -48,7 +55,9 @@ class Handler(SimpleHTTPRequestHandler):
             now = time.monotonic()
             if now - _last_speak >= SPEAK_EVERY_S:
                 _last_speak = now
-                return self.send_json({"speak": "Hello from the mock server", "alert": "none"})
+                speak, alert = MOCK_REPLIES[_tick % len(MOCK_REPLIES)]
+                _tick += 1
+                return self.send_json({"speak": speak, "alert": alert})
             return self.send_json({"speak": None, "alert": "none"})
 
         if self.path == "/command":
