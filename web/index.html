@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>JabCross</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; color: #fff; font-family: -apple-system, system-ui, sans-serif; overflow: hidden; }
+  #startBtn { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; background: #ffd400; color: #000; font-size: 12vw; font-weight: 700; }
+  #run { position: fixed; inset: 0; display: none; }
+  #video { width: 100%; height: 100%; object-fit: cover; }
+  #hint { position: absolute; top: env(safe-area-inset-top, 0); left: 0; right: 0; padding: 12px; text-align: center; font-size: 22px; font-weight: 700; background: rgba(0,0,0,.6); }
+  #debug { position: absolute; left: 0; right: 0; bottom: 0; padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0)); background: #000; color: #0f0; font: 12px/1.35 ui-monospace, Menlo, monospace; white-space: pre-wrap; word-break: break-word; }
+  #controls { display: flex; gap: 6px; margin-bottom: 4px; }
+  #controls button, #controls input { font: 14px ui-monospace, Menlo, monospace; padding: 6px 8px; background: #222; color: #fff; border: 1px solid #888; }
+  #cmdInput { flex: 1; min-width: 0; }
+</style>
+</head>
+<body>
+<button id="startBtn" aria-label="Tap to start navigation. Grants camera, motion, and microphone.">Tap to start</button>
+
+<div id="run" role="button" tabindex="0" aria-label="Tap to talk">
+  <video id="video" playsinline muted autoplay></video>
+  <div id="hint">Tap anywhere to talk</div>
+  <div id="debug">
+    <div id="controls">
+      <button id="srcBtn">src: compass</button>
+      <input id="cmdInput" placeholder="type a command" hidden>
+      <button id="cmdSend" hidden>send</button>
+    </div>
+    <div id="debugText"></div>
+  </div>
+</div>
+<canvas id="canvas" hidden></canvas>
+
+<script>
+// ---- Tunables -------------------------------------------------------------
+const MIN_FRAME_MS = 300;
+const FRAME_WIDTH = 640;
+// Gyro fallback. Phone upright on chest, camera forward: turning the body rotates
+// about the phone's long (Y) axis. W3C: rotationRate.alpha = around Z, beta = around X,
+// gamma = around Y. Right-hand rule with Y pointing up => a right (clockwise from above)
+// turn gives a NEGATIVE rate, so -1 makes heading increase on a right turn.
+// If the gyro value moves the wrong way, flip GYRO_SIGN. If it doesn't move at all when
+// turning, watch the raw "rr a/b/g" debug values and set GYRO_AXIS to the one that moves.
+const GYRO_SIGN = -1;
+const GYRO_AXIS = 'gamma';
+
+// ---- DOM / state ----------------------------------------------------------
+const $ = id => document.getElementById(id);
+const video = $('video'), canvas = $('canvas'), ctx = canvas.getContext('2d');
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+let started = false, navigating = false, audioCtx = null, wakeLock = null;
+let compass = null, gyro = 0, lastMotionT = null, rawRate = '-', headingSrc = 'compass';
+let rtt = '-', lastSpeak = '-', lastTranscript = '-', lastErr = '-';
+let speaking = false, pending = null, curUtt = null, safetyTimer = null;
+let rec = null, listening = false, autoListen = !!SR, recErrCount = 0, recStartedAt = 0, restartTimer = null;
+
+function showErr(msg) { lastErr = String(msg); console.warn(msg); }
+
+// ---- Speech out -----------------------------------------------------------
+function say(text, urgent = false) {
+  lastSpeak = text;
+  if (urgent) { hush(); speakNow(text); return; }
+  if (speaking) { pending = text; return; }   // one slot, newest wins
+  speakNow(text);
+}
+
+function speakNow(text) {
+  stopListening();                            // don't transcribe ourselves
+  speaking = true;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.onend = u.onerror = () => { if (curUtt === u) speechDone(); };
+  curUtt = u;
+  clearTimeout(safetyTimer);                  // iOS sometimes never fires onend
+  safetyTimer = setTimeout(() => { if (curUtt === u) speechDone(); }, text.length * 80 + 2000);
+  speechSynthesis.speak(u);
+}
+
+function speechDone() {
+  clearTimeout(safetyTimer);
+  curUtt = null; speaking = false;
+  if (pending) { const t = pending; pending = null; speakNow(t); }
+  else maybeListen();
+}
+
+function hush() {
+  curUtt = null; pending = null; speaking = false;
+  clearTimeout(safetyTimer);
+  speechSynthesis.cancel();
+}
+
+// ---- Tones ----------------------------------------------------------------
+function beep(freq, durS, atS) {
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0.4, atS);
+  g.gain.setValueAtTime(0, atS + durS);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(atS); o.stop(atS + durS + 0.02);
+}
+
+function tone(kind) {
+  if (!audioCtx) return;
+  if (audioCtx.state !== 'running') audioCtx.resume();
+  const t = audioCtx.currentTime + 0.02;
+  if (kind === 'warn') beep(880, 0.15, t);
+  if (kind === 'stop') for (let i = 0; i < 3; i++) beep(1400, 0.1, t + i * 0.18);
+}
+
+// ---- Heading --------------------------------------------------------------
+addEventListener('deviceorientation', e => {
+  if (e.webkitCompassHeading != null) compass = e.webkitCompassHeading;   // iOS, clockwise
+  else if (e.alpha != null) compass = (360 - e.alpha) % 360;             // alpha is CCW
+});
+
+addEventListener('devicemotion', e => {
+  const r = e.rotationRate, now = performance.now();
+  if (r && r[GYRO_AXIS] != null) {
+    if (lastMotionT != null) {
+      const dt = Math.min((now - lastMotionT) / 1000, 0.2);              // ignore long gaps
+      gyro = ((gyro + GYRO_SIGN * r[GYRO_AXIS] * dt) % 360 + 360) % 360;
+    }
+    rawRate = [r.alpha, r.beta, r.gamma].map(v => (v ?? 0).toFixed(0)).join('/');
+  }
+  lastMotionT = now;
+});
+
+function currentHeading() {
+  return headingSrc === 'compass' && compass != null ? compass : gyro;
+}
+
+// ---- Frame loop -----------------------------------------------------------
+async function frameLoop() {
+  for (;;) {
+    const t0 = performance.now();
+    try {
+      if (!video.videoWidth) { await sleep(MIN_FRAME_MS); continue; }
+      const h = Math.round(video.videoHeight * FRAME_WIDTH / video.videoWidth);
+      if (canvas.width !== FRAME_WIDTH || canvas.height !== h) { canvas.width = FRAME_WIDTH; canvas.height = h; }
+      ctx.drawImage(video, 0, 0, FRAME_WIDTH, h);
+      const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.7));
+      const fd = new FormData();
+      fd.append('image', blob, 'frame.jpg');
+      fd.append('heading', currentHeading().toFixed(1));
+      const opts = { method: 'POST', body: fd };
+      if (AbortSignal.timeout) opts.signal = AbortSignal.timeout(8000);   // don't hang forever on a dead tunnel
+      const res = await fetch('/frame', opts);
+      if (!res.ok) throw new Error('frame HTTP ' + res.status);
+      const j = await res.json();
+      rtt = Math.round(performance.now() - t0);
+      if (j.alert === 'warn' || j.alert === 'stop') tone(j.alert);
+      // Before the first command, only stop alerts may talk, so the opening question isn't clobbered.
+      if (j.speak && (navigating || j.alert === 'stop')) say(j.speak, j.alert === 'stop');
+      await sleep(Math.max(0, MIN_FRAME_MS - (performance.now() - t0)));
+    } catch (e) {
+      showErr('frame: ' + e.message);
+      await sleep(1000);
+    }
+  }
+}
+
+// ---- Voice in -------------------------------------------------------------
+async function sendCommand(text) {
+  lastTranscript = text;
+  try {
+    const res = await fetch('/command', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }),
+    });
+    const j = await res.json();
+    navigating = true;
+    if (j.speak) say(j.speak);
+  } catch (e) { showErr('command: ' + e.message); }
+}
+
+function startListening() {
+  if (!SR || listening || speaking || pending) return;
+  const r = new SR();                          // fresh instance each time; reuse is flaky on iOS
+  r.lang = 'en-US'; r.interimResults = false; r.continuous = false;
+  r.onresult = e => {
+    recErrCount = 0;
+    const res = e.results[e.results.length - 1];
+    if (res.isFinal && res[0].transcript.trim()) sendCommand(res[0].transcript.trim());
+  };
+  r.onerror = e => {
+    if (e.error === 'no-speech' || e.error === 'aborted') return;
+    showErr('rec: ' + e.error);
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      autoListen = false;                      // stop retrying; tap mode only
+      $('hint').textContent = 'Mic blocked. Tap to talk';
+    } else recErrCount++;
+  };
+  r.onend = () => {
+    if (rec !== r) return;                     // aborted by stopListening; it handles restart
+    rec = null; listening = false;
+    clearTimeout(restartTimer);
+    const quick = performance.now() - recStartedAt < 1000;
+    if (autoListen) restartTimer = setTimeout(maybeListen, recErrCount || quick ? 1000 : 250);
+  };
+  rec = r; listening = true; recStartedAt = performance.now();
+  try { r.start(); } catch (e) { rec = null; listening = false; showErr('rec start: ' + e.message); }
+}
+
+function stopListening() {
+  clearTimeout(restartTimer);
+  if (!rec) return;
+  const r = rec; rec = null; listening = false;
+  try { r.abort(); } catch (e) {}
+}
+
+function maybeListen() {
+  if (autoListen && started) startListening();
+}
+
+// Tap anywhere on the running screen = talk now (interrupts speech).
+$('run').addEventListener('click', () => {
+  if (!SR) { $('cmdInput').focus(); return; }
+  hush(); stopListening(); startListening();
+});
+$('controls').addEventListener('click', e => e.stopPropagation());
+$('srcBtn').addEventListener('click', () => {
+  headingSrc = headingSrc === 'compass' ? 'gyro' : 'compass';
+  $('srcBtn').textContent = 'src: ' + headingSrc;
+});
+function sendTyped() {
+  const t = $('cmdInput').value.trim();
+  if (t) { $('cmdInput').value = ''; sendCommand(t); }
+}
+$('cmdSend').addEventListener('click', sendTyped);
+$('cmdInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendTyped(); });
+
+// ---- Wake lock ------------------------------------------------------------
+async function getWakeLock() {
+  if (!('wakeLock' in navigator)) { showErr('no wakeLock API'); return; }
+  try { wakeLock = await navigator.wakeLock.request('screen'); }
+  catch (e) { showErr('wakeLock: ' + e.message); }
+}
+document.addEventListener('visibilitychange', () => {
+  if (started && document.visibilityState === 'visible') getWakeLock();
+});
+
+// ---- Start (single user gesture unlocks everything) -----------------------
+$('startBtn').addEventListener('click', () => {
+  // Everything gated by iOS gesture rules is called synchronously here, before any await.
+  say('Starting');
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx.resume();
+    const s = audioCtx.createBufferSource();   // silent buffer: extra iOS unlock
+    s.buffer = audioCtx.createBuffer(1, 1, 22050);
+    s.connect(audioCtx.destination); s.start();
+  } catch (e) { showErr('audio: ' + e.message); }
+  const perms = [];
+  if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function')
+    perms.push(DeviceOrientationEvent.requestPermission());
+  if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function')
+    perms.push(DeviceMotionEvent.requestPermission());
+  const cam = navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+    ? navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+    : Promise.reject(new Error('getUserMedia unavailable (needs HTTPS)'));
+  getWakeLock();
+  finishStart(cam, perms);
+});
+
+async function finishStart(cam, perms) {
+  started = true;
+  $('startBtn').style.display = 'none';
+  $('run').style.display = 'block';
+  if (!SR) {
+    $('cmdInput').hidden = false; $('cmdSend').hidden = false;
+    $('hint').textContent = 'No speech recognition: type below';
+  }
+  for (const p of await Promise.allSettled(perms)) {
+    if (p.status === 'rejected') showErr('motion perm: ' + p.reason);
+    else if (p.value !== 'granted') showErr('motion perm: ' + p.value);
+  }
+  let camOk = false;
+  try {
+    video.srcObject = await cam;
+    await video.play();
+    camOk = true;
+  } catch (e) {
+    showErr('camera: ' + e.name + ' ' + e.message);
+    say('Camera failed. ' + e.name, true);
+  }
+  say('Where would you like to go?');
+  if (camOk) frameLoop();
+}
+
+// ---- Debug strip ----------------------------------------------------------
+setInterval(() => {
+  if (!started) return;
+  const f = v => v == null ? '-' : v.toFixed(0);
+  $('debugText').textContent =
+    `speak: ${lastSpeak}\n` +
+    `hdg compass ${f(compass)}  gyro ${f(gyro)}  sent=${headingSrc === 'compass' && compass != null ? 'compass' : 'gyro'}  rr a/b/g ${rawRate}\n` +
+    `rtt ${rtt} ms  ${speaking ? 'SPEAKING' : ''} ${listening ? 'listening…' : (autoListen ? 'mic idle' : 'tap to talk')}\n` +
+    `heard: ${lastTranscript}\n` +
+    `err: ${lastErr}`;
+}, 250);
+</script>
+</body>
+</html>
