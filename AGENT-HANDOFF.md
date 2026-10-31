@@ -15,5 +15,5 @@ In `demo/build_model.py`, then rerun it:
 - Node positions (y down), any scale: m0 (0,0), m1 (D,0), m2 (D,-D), m3 (D,-2D). Leg headings: 0->1 = 90, 1->2 = 0, 2->3 = 0.
 - facing: m0 = 0, m1 = 90, m2 = 0, m3 = 0.
 - Edge steps: 7 each for now (5 m); Ayan will count and send real numbers.
-- Names (FINAL, signs are printed): m0 "Entrance", m1 "Lobby", m2 "Pharmacy", m3 "X-ray". Destinations: pharmacy, xray. Aliases: pharmacy -> "pharmacy", "medicine", "prescription"; xray -> "x-ray", "xray", "radiology", "radiation lab", "imaging". "lab" can also route to X-ray.
+- Names (FINAL, signs are printed): m0 "Entrance", m1 "Lobby", m2 "Pharmacy", m3 "X-ray". Destinations: pharmacy, xray. Aliases: pharmacy -> "pharmacy", "medicine", "prescription"; xray -> "x-ray", "x ray", "xray", "radiology", "radiation lab", "imaging". "lab" can also route to X-ray.
 - Test with fake perception, markers 0,1,2,3 in order, starting heading 0. Expect: "turn right ~90", walk, "turn left ~90", walk, walk, "You have arrived at X-ray."
