@@ -13,7 +13,12 @@ from ultralytics.utils.plotting import colorize_depth
 
 # ---- Depth: YOLO26 depth, output in meters, same size as the frame ----
 DEVICE = "mps" if torch.backends.mps.is_available() else 0 if torch.cuda.is_available() else "cpu"
-MODEL = YOLO("yolo26n-depth.pt")  # downloads on first use; predicts at its trained 768 px. s/m/l/x: slower, more accurate
+MODEL = YOLO("yolo26n-depth.pt")  # downloads on first use. yolo26m-depth.pt: ~20% less error, ~5x slower
+# The model's default stretches every frame to a 768 px square, which made NYU Depth V2 indoor scenes read ~24% too
+# far. Keeping the frame's own shape at 640 px on the long side cut that to ~9% and runs faster.
+LONG_SIDE = 640
+# Multiplies every depth reading: (tape-measured meters) / (reported meters), from facing a wall at 1, 2 and 3 m.
+DEPTH_SCALE = 1.0
 _latest_depth_jpg = None
 
 # Camera on the chest at ~1.3 m. Level, the bottom quarter of a portrait frame sees floor 2-4 m away, but
@@ -83,7 +88,9 @@ def perceive(jpeg_bytes):
     global _latest_depth_jpg
     bgr = cv2.imdecode(np.frombuffer(jpeg_bytes, np.uint8), cv2.IMREAD_COLOR)
     gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
-    depth = MODEL.predict(bgr, device=DEVICE, verbose=False)[0].depth.data.cpu().numpy()
+    s = LONG_SIDE / max(bgr.shape[:2])
+    imgsz = [round(bgr.shape[0] * s / 32) * 32, round(bgr.shape[1] * s / 32) * 32]  # model needs multiples of 32
+    depth = MODEL.predict(bgr, imgsz=imgsz, device=DEVICE, verbose=False)[0].depth.data.cpu().numpy() * DEPTH_SCALE
     view_ok, obstacles = summarize(depth, gray)
     _latest_depth_jpg = cv2.imencode(".jpg", draw_depth(depth, obstacles))[1].tobytes()
     return {"view_ok": view_ok, "obstacles": obstacles, "markers": detect_markers(gray)}

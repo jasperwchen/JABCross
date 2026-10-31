@@ -95,7 +95,8 @@ and rerun it. Jasper adds three fields:
       `speak`. Serves `web/` and `demo/`. This unblocks Ayan's first test.
 - [x] **Depth**: Ultralytics YOLO26 depth (`yolo26n-depth.pt`, Mac GPU via MPS). Nearest meters in
       left / center / right thirds, above the bottom quarter (floor). Measure frames per second on the Mac.
-      Absolute meters are uncalibrated: check them against a tape measure with `server/live_depth.py`.
+      Frames keep their shape (stretching to a square read ~24% too far on NYU Depth V2). Check meters against
+      a tape measure with `server/live_depth.py`, then set `DEPTH_SCALE` in `server/perception.py`.
 - [x] **`view_ok`**: false when the frame is nearly uniform (lens covered). The depth model alone
       cannot tell: it predicts a smooth ~1 m wall for a covered lens.
 - [x] **Markers**: OpenCV ArUco, dictionary `DICT_4X4_50`, printed side **0.15 m**. Return distance
