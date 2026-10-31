@@ -1,2 +1,3 @@
 docs/jabcross_a5logs.txt
 .venv/
+*.pt
