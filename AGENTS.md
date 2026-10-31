@@ -64,8 +64,9 @@ shared endpoint/data shape with the user before implementing them.
   Consult these for background without overriding the current shared build plan.
 - `web/` may contain in-progress local work. Inspect it without overwriting it.
   The phone mock server is independent of the planned real server.
-- At the time these instructions were written, `server/` was not present in the
-  checkout. Do not assume the real server, navigator, or live viewer integration
+- `server/` holds the real server (`app.py`, `perception.py`, dependencies in
+  `requirements.txt`) and the navigator (`nav.py`). Depth runs untested on real
+  weights until checked on the laptop; do not assume live viewer integration
   exists merely because it appears in `PLAN.md`.
 
 No accounts, scheduling, reviews, caregiver requests, or additional disability
@@ -133,7 +134,12 @@ Run from the repository root (commands assume the relevant files are present):
 ```sh
 # Standalone viewer; no npm install required.
 python3 -m http.server 8766 --bind 127.0.0.1 --directory demo
-# Phone mock, before the real server is ready.
+# Real server on port 8000 (first frame downloads the ~100 MB depth model).
+python3 -m venv .venv && .venv/bin/pip install -r server/requirements.txt
+.venv/bin/python server/app.py
+# Depth + marker speed check on one saved phone frame.
+.venv/bin/python server/perception.py frame.jpg
+# Phone mock, when the real server is not needed.
 python3 web/dev_server.py
 # Expose whichever server is listening on port 8000 to the phone over HTTPS.
 cloudflared tunnel --url http://localhost:8000

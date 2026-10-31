@@ -91,14 +91,14 @@ and rerun it. Jasper adds three fields:
 
 ## Brian (A): perception + server
 
-- [ ] **By 0:30**: FastAPI skeleton with all routes above. `/frame` and `/command` return a canned
+- [x] **By 0:30**: FastAPI skeleton with all routes above. `/frame` and `/command` return a canned
       `speak`. Serves `web/` and `demo/`. This unblocks Ayan's first test.
 - [ ] **Depth**: Depth Anything V2 Metric Indoor Small (transformers, Mac GPU via MPS). Nearest
       meters in left / center / right thirds of the frame. Measure frames per second.
 - [ ] **`view_ok`**: false when almost everything is closer than ~0.3 m (lens covered).
-- [ ] **Markers**: OpenCV ArUco, dictionary `DICT_4X4_50`, printed side **0.15 m**. Return distance
+- [x] **Markers**: OpenCV ArUco, dictionary `DICT_4X4_50`, printed side **0.15 m**. Return distance
       and bearing per marker.
-- [ ] **`/depth.jpg`**: save the latest depth frame as a color image.
+- [x] **`/depth.jpg`**: save the latest depth frame as a color image.
 - [ ] **Jev (only after the above works)**: confirm someone has an API key in the first 15 min, or
       drop it. Ask "which of these nearby junctions is this?" with the frame. Keep only if mostly
       right at the demo junctions. No key: ask Claude vision the same question.
