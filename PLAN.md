@@ -128,13 +128,13 @@ and rerun it. Jasper adds three fields:
 - [ ] **By 0:30**: phone page behind the tunnel (`cloudflared tunnel --url http://localhost:8000`).
       One full-screen "tap to start" (grants camera, mic, motion). Send a frame every ~300 ms to
       `/frame`, speak `speak` with browser speech. **Checkpoint: the phone speaks Brian's canned reply.**
-- [ ] **Screen awake**: Wake Lock API. A locked screen kills the camera.
-- [ ] **Heading**: device orientation events (iPhone needs a permission request on the start tap).
+- [x] **Screen awake**: Wake Lock API. A locked screen kills the camera.
+- [x] **Heading**: device orientation events (iPhone needs a permission request on the start tap).
       Convert to clockwise degrees before sending.
-- [ ] **Voice, so the app runs itself**: on start say "Where would you like to go?", send the
+- [x] **Voice, so the app runs itself**: on start say "Where would you like to go?", send the
       transcript to `/command`, guidance starts automatically. Pause listening while the app talks,
       or it hears itself. If continuous listening is flaky on iPhone, use "tap anywhere to talk".
-- [ ] **Alerts as tones** (Web Audio). iPhone Safari cannot vibrate.
+- [x] **Alerts as tones** (Web Audio). iPhone Safari cannot vibrate.
 - [ ] **By 1:00, with Jasper**: pick the venue route. Then print department signs that match it and
       tape markers at chest height (write the location on each sheet).
 - [ ] **Video**: lead filming and the edit. Open with "Google Maps for hospitals."
