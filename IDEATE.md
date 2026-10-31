@@ -1,53 +1,73 @@
-# JabCross — Idea
+# JabCross: Google Maps for hospitals
 
 ## Prompt (see PROMPT.md)
 
 Accessibility tools for navigating the medical care system for disabled users.
 Judged on: practicality/relevance, creativity/innovation, significance, technical complexity.
 
-Format: 5-hour hackathon, 3 team members. Submission is a **video** + the codebase + a few written
-questions. Judging is done through the video. The codebase only needs to be generally acceptable;
-it will not be scrutinized line by line.
+Format: 5-hour hackathon, 3 team members. Submission is a video + the codebase + a few written
+questions. Judging happens through the video; the codebase only needs to be generally acceptable.
 
-## Concept
+## Pitch
 
-A single at-home hub for disabled users. Each team member takes one specific disability (chosen
-because it causes demonstrable harm when navigating care) and engineers a focused solution for it.
-The three solutions plus one general-purpose feature are packaged together into one app with a
-shared account system.
+Google Maps for hospitals. A patient says where they need to go ("take me to Radiology") and the
+app walks them there with spoken, real-time directions: "turn right about 30 degrees", "walk
+forward about 12 steps", "stop", "obstacle ahead on your left", "you have arrived".
 
-Four features:
+First focus: blind and low-vision patients. The phone is worn on the chest, camera facing forward.
+A depth model watches the path ahead for obstacles and checks the camera has a usable view.
 
-1. **General: care requests (adapted from BetterBell).** The user taps what they need instead of
-   pressing a binary call bell, and their caregiver is notified with the specific request.
-2. **Disability-specific feature A.** Owner: TBD. Example: depth/obstacle detection for blind users.
-3. **Disability-specific feature B.** Owner: TBD.
-4. **Disability-specific feature C.** Owner: TBD.
+Decided:
+- One core feature (hospital navigation), not a multi-feature hub
+- No BetterBell code; accounts are hardcoded
+- Security is out of scope (proof of concept)
 
-## Reuse of BetterBell
+## The hard problem: knowing where the user is
 
-BetterBell (betterbell.care) is an existing project by a team member: a patient request platform
-that replaces the physical hospital call bell with a mobile app. Hackathon organizers confirmed that
-reusing concepts is allowed as long as the project meaningfully deviates from BetterBell and is
-themed toward this prompt.
+Indoors there is no GPS and no map, and depth detection alone does not say where you are.
+Proposed approach:
+- **Building map**: a hand-built graph of junctions and destinations. Each hallway edge stores a
+  direction and an approximate step count.
+- **Printed markers at each junction and destination** (ArUco codes: black-and-white squares that
+  OpenCV can detect and measure). When the camera sees one, we know where the user is, how far
+  away the marker is, and the angle to it, which drives "angle a bit left" corrections.
+  Real-world precedent: NaviLens codes are already used in transit for blind riders.
+- **Phone gyroscope** for turns between markers ("turn left 90 degrees" = change in heading).
+- **Depth model** for obstacles and "bad view" warnings.
 
-What we take from BetterBell:
-- Account system (email login, user profile)
-- Patient <-> caregiver linking (BetterBell `CareLink`)
-- Request types + requests, generalized beyond hospital use
-- Push notifications to the caregiver
+## Architecture
 
-What we leave behind (this is a proof of concept; security is out of scope):
-- Audit logging, Postgres RLS, audit triggers
-- Argon2 hashing config, hashed session tokens, throttling
-- Setup/reset email links, soft delete, HIPAA/compliance infrastructure
-- Hospital facility/bed/QR code paths
+- **Phone (browser page, worn on chest)**: sends camera frames to the server, speaks
+  instructions, vibrates on danger, reads the gyroscope, takes the destination by voice.
+- **Laptop server (Python, FastAPI)**:
+  - Depth model (Depth Anything V2 Metric Indoor, small) -> nearest obstacle in left / center / right
+  - Marker detection (OpenCV ArUco) -> current position, distance and bearing to marker
+  - Route planner + guidance logic -> next spoken instruction
+- **HTTPS tunnel** (cloudflared or ngrok): phone browsers only allow camera access over HTTPS.
 
-BetterBell stack for reference: Django + Django REST Framework + PostgreSQL backend,
-React Native (Expo, expo-router, TypeScript) mobile client.
+## Team split
 
-## Open decisions
+- **A, perception**: depth model + marker detection, one endpoint that takes a frame and returns
+  obstacles and markers seen.
+- **B, navigation**: building map, routing, guidance logic, matching the spoken destination.
+- **C, phone + demo**: phone page, tunnel, mapping the venue, printing markers and signs, video.
 
-- Which three disabilities, and who owns each
-- Stack for JabCross (keep Django + Expo from BetterBell, or something lighter)
-- How the features connect so it reads as one product in the video, not four separate demos
+## Timeline
+
+- 0:30 end-to-end spike: phone sends a frame, server replies, phone speaks it
+- 2:30 one full route works (entrance -> one turn -> obstacle -> destination)
+- 3:45 feature freeze
+- 4:00-5:00 film and edit
+
+## Demo plan
+
+Stage the venue as a hospital: paper department signs, markers at junctions, one route with a turn
+and a chair in the way. A blindfolded teammate wears the phone, with a spotter. In the edit, show
+the depth map and a map view with the user's position next to the live footage.
+
+## Not building (roadmap slide only)
+
+Reviews, scheduling with a doctor, service requests, routing for other disabilities
+(e.g. step-free routes for wheelchair users).
+Stretch if ahead of schedule: destination suggested from a hardcoded appointment
+("You have Radiology at 2pm. Go there?").
