@@ -1,7 +1,23 @@
 import re
 import unittest
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
 
 from nav import MAP_PATH, Navigator
+
+# Keep the existing hospital regression scenarios even when the café is active.
+def setUpModule():
+    global hospital_temp, hospital_map
+    hospital_temp = tempfile.TemporaryDirectory(dir=Path(__file__).parent)
+    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[1] / 'demo/build_model.py'),
+                    '--hospital', '--output-dir', hospital_temp.name], check=True, capture_output=True)
+    hospital_map = Path(hospital_temp.name) / 'grady-ground.json'
+
+
+def tearDownModule():
+    hospital_temp.cleanup()
 
 GYRO_START = 200  # The phone's heading is relative, so it never matches map headings.
 
@@ -33,7 +49,7 @@ class Clock:
 class NavTest(unittest.TestCase):
     def setUp(self):
         self.clock = Clock()
-        self.nav = Navigator(clock=self.clock)
+        self.nav = Navigator(map_path=hospital_map, clock=self.clock)
 
     def update(self, perception, map_heading=0):
         self.clock.now += 3.1

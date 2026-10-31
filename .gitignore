@@ -2,3 +2,6 @@ docs/jabcross_a5logs.txt
 .venv/
 *.pt
 __pycache__/
+
+# Isolated Sites source checkout; published separately from this repository.
+/sites/gsmst-viewer/

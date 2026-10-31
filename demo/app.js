@@ -2,7 +2,19 @@ import * as THREE from 'three';
 import {OrbitControls} from './vendor/OrbitControls.js';
 const $=s=>document.querySelector(s), host=$('#viewport');
 try {
-const data=await fetch('./grady-ground.json').then(r=>{if(!r.ok)throw Error('Map data unavailable');return r.json()});
+const venue=new URLSearchParams(location.search).get('map')==='cafe'?'cafe':'hospital';
+const mapBase=`./maps/${venue}/`;
+const data=await fetch(mapBase+'grady-ground.json').then(r=>{if(!r.ok)throw Error('Map data unavailable');return r.json()});
+const cafe=data.venue==='cafe';
+for(const link of document.querySelectorAll('.map-tabs a'))if(link.dataset.map===venue)link.setAttribute('aria-current','page');
+for(const link of document.querySelectorAll('footer a[download]'))link.href=mapBase+link.getAttribute('href');
+$('#start-name').textContent=data.nodes.entrance.name+' · Marker 0';
+$('#venue').textContent=cafe?'GSMST cafeteria demo':'Grady Memorial Hospital';
+$('#map-heading').textContent=cafe?'GSMST cafeteria demo':'Grady Memorial Hospital';
+document.title=cafe?'JabCross · GSMST cafeteria demo':'JabCross · Grady Memorial Hospital';
+$('#destination').replaceChildren(...data.destinations.map(id=>{const option=document.createElement('option');option.value=id;option.textContent=data.nodes[id].name;return option}));
+if(cafe)$('#destination').value='xray';
+if(!cafe){$('#map-description').textContent='Plan a route through the entrance and outpatient area, then preview the walk.';$('#scope').textContent='Ground floor · GMH-G';$('#map-scope').textContent='Entrance / outpatient area';$('#route-note').textContent='Based on the Grady floor plan. Routes and distances are illustrative and have not been validated for patient use.'}
 const scene=new THREE.Scene();scene.background=new THREE.Color('#eef0e8');
 const camera=new THREE.PerspectiveCamera(42,1,.1,500);camera.position.set(4,73,64);
 const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));host.appendChild(renderer.domElement);
@@ -14,6 +26,7 @@ const cube=new THREE.BoxGeometry(1,1,1);
 for(const obj of data.objects){const mesh=new THREE.Mesh(cube,materials[obj.material]);mesh.name=obj.name;mesh.position.fromArray(obj.position);mesh.scale.fromArray(obj.size);mesh.rotation.y=obj.rotation;if(obj.material==='wall'){const edge=new THREE.LineSegments(new THREE.EdgesGeometry(cube),new THREE.LineBasicMaterial({color:0x93a99b,transparent:true,opacity:.45}));mesh.add(edge)}scene.add(mesh)}
 // The SVG covers the whole sheet. Crop it to the same PDF coordinates as the modeled area.
 // Original raster reference: longest side 4200 px, crop (1550,1850,1700,650).
+if(!cafe){
 const svgResponse=await fetch('./grady-ground.svg');
 if(!svgResponse.ok)throw Error('SVG floor plan unavailable');
 const svgText=await svgResponse.text(), unit=1224/4200;
@@ -24,13 +37,14 @@ let texture;
 try{texture=await new THREE.TextureLoader().loadAsync(svgUrl)}finally{URL.revokeObjectURL(svgUrl)}
 texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
 const reference=new THREE.Mesh(new THREE.PlaneGeometry(85,32.5),new THREE.MeshBasicMaterial({map:texture,transparent:true,opacity:.38,depthWrite:false}));reference.rotation.x=-Math.PI/2;reference.position.y=.045;reference.visible=$('#reference').checked;scene.add(reference);$('#reference').onchange=e=>reference.visible=e.target.checked;
+}else{$('#reference').checked=false;$('#reference').closest('label').hidden=true;}
 const dot=new THREE.Mesh(new THREE.SphereGeometry(.55,24,16),new THREE.MeshStandardMaterial({color:0xe8ad35}));scene.add(dot);
 const labels=[];
 function addLabel(name,x,y,priority,width=80,height=60,id=null){
  const el=document.createElement('div');el.className='label';el.textContent=name;el.hidden=true;
  $('#labels').appendChild(el);labels.push({el,pos:xyz(x,y,2.4),priority,width,height,id});
 }
-for(const id of ['entrance','lab','cafe','cashier']){const n=data.nodes[id];addLabel(n.name,n.x,n.y,0,100,80,id)}
+for(const id of ['entrance',...(cafe?['lobby']:[]),...data.destinations]){const n=data.nodes[id],pillar=data.pillars?.find(p=>p.marker===n.marker);addLabel(cafe?`${n.marker} · ${n.name}`:n.name,pillar?.x??n.x,pillar?.y??n.y,0,100,80,id)}
 for(const room of data.rooms){
  if(/^(Cashier|Caf\u00e9|Lab waiting|Entrance vestibule)/.test(room.name))continue;
  const name=room.name.replace(/\s+[BG]\d+-\d+[A-Z]?/g,'').replace(' enclosure','');
@@ -75,7 +89,8 @@ const beam=new THREE.Mesh(beamGeometry,new THREE.MeshBasicMaterial({vertexColors
 const markerGeometry=new THREE.SphereGeometry(.36,16,12),markerIdle=new THREE.MeshBasicMaterial({color:0x2b5fb8,transparent:true,depthTest:false}),markerSeen=new THREE.MeshBasicMaterial({color:0x00b7ff,transparent:true,depthTest:false}),markers=[];
 for(const node of Object.values(data.nodes)){
  const angle=THREE.MathUtils.degToRad(node.facing),dx=Math.sin(angle),dz=-Math.cos(angle),mesh=new THREE.Mesh(markerGeometry,markerIdle);mesh.name='Marker '+node.marker;mesh.renderOrder=3;
- mesh.position.copy(xyz(node.x,node.y,1));mesh.position.addScaledVector(new THREE.Vector3(dx,0,dz),cast(mesh.position.x,mesh.position.z,dx,dz)-.05);
+ if(node.markerPosition){mesh.position.copy(xyz(...node.markerPosition,1.25));mesh.position.addScaledVector(new THREE.Vector3(-dx,0,-dz),.06)}
+ else{mesh.position.copy(xyz(node.x,node.y,1));mesh.position.addScaledVector(new THREE.Vector3(dx,0,dz),cast(mesh.position.x,mesh.position.z,dx,dz)-.05);}
  // Nodes in a straight line share a wall spot, so spread those markers along the wall.
  while(markers.some(m=>m.position.distanceTo(mesh.position)<.8))mesh.position.add(new THREE.Vector3(-dz*.8,0,dx*.8));
  markers.push(mesh);scene.add(mesh);
@@ -99,14 +114,37 @@ let path=[],routeIds=[],route,playing=false,offRoute=false,segment=0,fraction=0,
 const legHeading=i=>Math.atan2(path[i+1].x-path[i].x,-(path[i+1].z-path[i].z));
 function shortest(target){const distances={entrance:0},previous={},todo=new Set(Object.keys(data.nodes));while(todo.size){let u=[...todo].reduce((a,b)=>(distances[a]??Infinity)<(distances[b]??Infinity)?a:b);todo.delete(u);if(u===target)break;for(const [a,b,w] of data.edges){let v=a===u?b:b===u?a:null;if(v&&todo.has(v)&&(distances[u]??Infinity)+w<(distances[v]??Infinity)){distances[v]=distances[u]+w;previous[v]=u}}}const result=[target];while(result[0]!=='entrance'){const n=previous[result[0]];if(!n)throw Error('Destination is unreachable');result.unshift(n)}return result}
 function say(text){$('#guidance').textContent=text;if($('#voice').checked&&'speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(text))}}
-function reset(){playing=false;offRoute=false;segment=0;fraction=0;elapsed=0;$('#play').textContent='Simulate walk';$('#progress').value=0;dot.position.copy(path[0]);heading=targetHeading=legHeading(0);say('Ready at the entrance.')}
+function instruction(i,fromHeading){const error=Math.atan2(Math.sin(legHeading(i)-fromHeading),Math.cos(legHeading(i)-fromHeading))*180/Math.PI;const edge=data.edges.find(([a,b])=>a===routeIds[i]&&b===routeIds[i+1]||b===routeIds[i]&&a===routeIds[i+1]);return `${Math.abs(error)>15?`Turn ${error>0?'right':'left'} about ${Math.round(Math.abs(error)/5)*5} degrees. `:''}Walk forward about ${edge[2]} steps.`}
+function reset(){playing=false;offRoute=false;segment=0;fraction=0;elapsed=0;$('#play').textContent='Simulate walk';$('#progress').value=0;dot.position.copy(path[0]);heading=targetHeading=THREE.MathUtils.degToRad(data.nodes.entrance.facing);say('Ready at the entrance. Facing marker 0.')}
 function choose(){if(route){scene.remove(route);route.geometry.dispose();route.material.dispose()}routeIds=shortest($('#destination').value);path=routeIds.map(id=>{const n=data.nodes[id];return xyz(n.x,n.y,.65)});total=path.slice(1).reduce((s,p,i)=>s+p.distanceTo(path[i]),0);route=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshBasicMaterial());route.geometry.dispose();const curve=new THREE.CurvePath();for(let i=1;i<path.length;i++)curve.add(new THREE.LineCurve3(path[i-1],path[i]));route.geometry=new THREE.TubeGeometry(curve,Math.ceil(total*3),.13,8,false);route.material.color.set(0x14856c);scene.add(route);$('#target').textContent=data.nodes[$('#destination').value].name;reset()}
-$('#destination').onchange=choose;$('#reset').onclick=reset;$('#play').onclick=()=>{if(offRoute||segment>=path.length-1)reset();playing=!playing;$('#play').textContent=playing?'Pause walk':'Resume walk';if(playing)say('Follow the highlighted route.')};
-function view(top){camera.position.set(...(top?[0,100,.01]:[4,73,64]));camera.position.multiplyScalar(Math.max(1,1.3/camera.aspect));controls.target.set(0,0,0);$('#top').setAttribute('aria-pressed',top);$('#angled').setAttribute('aria-pressed',!top);controls.update()}$('#top').onclick=()=>view(true);$('#angled').onclick=()=>view(false);
+$('#destination').onchange=choose;$('#reset').onclick=reset;$('#play').onclick=()=>{if(offRoute||segment>=path.length-1)reset();playing=!playing;$('#play').textContent=playing?'Pause walk':'Resume walk';if(playing){say(instruction(segment,heading));targetHeading=legHeading(segment)}};
+let overhead=false;
+function view(top){overhead=top;const distance=data.view?.distance??100;camera.position.set(...(top?[0,distance,.01]:[distance*.3,distance*.73,distance*.64]));camera.position.multiplyScalar(Math.max(1,1.3/camera.aspect));controls.target.fromArray(data.view?.center??[0,0,0]);$('#top').setAttribute('aria-pressed',top);$('#angled').setAttribute('aria-pressed',!top);controls.update()}$('#top').onclick=()=>view(true);$('#angled').onclick=()=>view(false);
 // Explicit adapter for the team's future perception integration. Does not infer live tracking.
 window.jabCross={setMarker(id){const key=Object.keys(data.nodes).find(k=>data.nodes[k].marker===id);if(!key)return false;const node=data.nodes[key],at=routeIds.indexOf(key);playing=false;offRoute=at<0;if(!offRoute){segment=at;fraction=0;elapsed=path.slice(1,at+1).reduce((s,p,i)=>s+p.distanceTo(path[i]),0);$('#progress').value=elapsed/total}$('#play').textContent=offRoute||at===path.length-1?'Replay walk':'Resume simulation';dot.position.copy(xyz(node.x,node.y,.65));heading=targetHeading=THREE.MathUtils.degToRad(node.facing);say('Marker received: '+node.name);return true},map:data};
-function resize(){camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();renderer.setSize(host.clientWidth,host.clientHeight)}new ResizeObserver(resize).observe(host);resize();view(false);choose();
-function animate(t){requestAnimationFrame(animate);let dt=Math.min((t-last)/1000,.05);last=t;if(playing&&segment<path.length-1){let budget=dt*5;while(budget>0&&segment<path.length-1){const len=path[segment].distanceTo(path[segment+1]),step=Math.min(budget,len*(1-fraction));fraction+=step/len;elapsed+=step;budget-=step;dot.position.lerpVectors(path[segment],path[segment+1],Math.min(fraction,1));if(fraction>=.999999){segment++;fraction=0;if(segment===path.length-1){playing=false;$('#play').textContent='Replay walk';say('You have arrived at '+$('#target').textContent+'.')}else say('Continue along the highlighted route.')}}$('#progress').value=Math.min(elapsed/total,1);if(segment<path.length-1)targetHeading=legHeading(segment)}const turn=Math.atan2(Math.sin(targetHeading-heading),Math.cos(targetHeading-heading));heading+=Math.sign(turn)*Math.min(Math.abs(turn),dt*TURN_SPEED);updateSight();controls.update();updateLabels();renderer.render(scene,camera)}requestAnimationFrame(animate);
+function resize(){camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();renderer.setSize(host.clientWidth,host.clientHeight);view(overhead)}new ResizeObserver(resize).observe(host);resize();view(cafe);choose();
+function animate(t){
+ requestAnimationFrame(animate);
+ const dt=Math.min((t-last)/1000,.05);last=t;
+ if(playing&&segment<path.length-1){
+  const turn=Math.atan2(Math.sin(targetHeading-heading),Math.cos(targetHeading-heading));
+  let budget=Math.abs(turn)<.04?dt*5:0;
+  while(budget>0&&segment<path.length-1){
+   const len=path[segment].distanceTo(path[segment+1]),step=Math.min(budget,len*(1-fraction));
+   fraction+=step/len;elapsed+=step;budget-=step;
+   dot.position.lerpVectors(path[segment],path[segment+1],Math.min(fraction,1));
+   if(fraction>=.999999){
+    segment++;fraction=0;budget=0;
+    if(segment===path.length-1){playing=false;$('#play').textContent='Replay walk';say('You have arrived at '+$('#target').textContent+'.')}
+    else{say(instruction(segment,legHeading(segment-1)));targetHeading=legHeading(segment)}
+   }
+  }
+  $('#progress').value=Math.min(elapsed/total,1);
+  const remainingTurn=Math.atan2(Math.sin(targetHeading-heading),Math.cos(targetHeading-heading));
+  heading+=Math.sign(remainingTurn)*Math.min(Math.abs(remainingTurn),dt*TURN_SPEED);
+ }
+ updateSight();controls.update();updateLabels();renderer.render(scene,camera);
+}requestAnimationFrame(animate);
 } catch(error){$('#error').textContent='Could not load the 3D viewer: '+error.message;console.error(error)}
 
 

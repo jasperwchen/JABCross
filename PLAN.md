@@ -61,6 +61,12 @@ FastAPI tip: register the API routes first, mount `/map` (from `demo/`), and mou
 
 ## The one map: `demo/grady-ground.json`
 
+The default build is now the staged cafeteria map from the screenshot and `AGENT-HANDOFF.md`:
+Entrance (0) -> Lobby (1) -> Pharmacy (2) -> X-ray (3), east then north then north.
+Each leg currently uses 7 estimated steps (about 5 m); venue counts and real-phone validation remain outstanding.
+Run `python demo/build_model.py` for the café, or `--hospital` to restore the original Grady reference.
+Both the viewer and server use this same filename; restart the server after changing maps.
+
 Both the viewer and the navigator read this file. Never edit it by hand; edit `demo/build_model.py`
 and rerun it. Jasper adds three fields:
 

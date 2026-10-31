@@ -1,0 +1,500 @@
+{
+  "venue": "cafe",
+  "title": "Cafeteria demo",
+  "source": "cafe-route-sketch.png; final staging in AGENT-HANDOFF.md",
+  "units": "Illustrative plan units; each 200-unit leg is approximately 5 m; edge values are estimated steps",
+  "coordinateSystem": "x right, y down; 3D x=x/20-42.5, z=y/20-16.25",
+  "stepCalibration": "7 steps per leg is an estimate; replace after walking the venue route",
+  "rooms": [],
+  "facilities": [],
+  "palette": {
+    "floor": "#edf0e9",
+    "pillar": "#b9c6bc",
+    "plinth": "#dde4db",
+    "marker": "#2864aa",
+    "sign": "#f9fbf7"
+  },
+  "objects": [
+    {
+      "name": "Cafeteria floor",
+      "position": [
+        0.0,
+        -0.04,
+        0.0
+      ],
+      "size": [
+        22.0,
+        0.08,
+        33.0
+      ],
+      "rotation": 0,
+      "material": "floor"
+    },
+    {
+      "name": "Pillar 0",
+      "position": [
+        -5.5,
+        1.2,
+        8.0
+      ],
+      "size": [
+        2.0,
+        2.4,
+        2.0
+      ],
+      "rotation": 0,
+      "material": "pillar"
+    },
+    {
+      "name": "Entrance base",
+      "position": [
+        -5.5,
+        0.04,
+        8.0
+      ],
+      "size": [
+        2.2,
+        0.08,
+        2.2
+      ],
+      "rotation": 0,
+      "material": "plinth"
+    },
+    {
+      "name": "Marker 0 face",
+      "position": [
+        -5.5,
+        1.25,
+        9.0
+      ],
+      "size": [
+        0.3,
+        0.3,
+        0.04
+      ],
+      "rotation": 0,
+      "material": "marker"
+    },
+    {
+      "name": "Entrance sign",
+      "position": [
+        -5.5,
+        1.675,
+        9.0
+      ],
+      "size": [
+        1.0,
+        0.35,
+        0.045
+      ],
+      "rotation": 0,
+      "material": "sign"
+    },
+    {
+      "name": "Pillar 1",
+      "position": [
+        6.5,
+        1.2,
+        10.0
+      ],
+      "size": [
+        2.0,
+        2.4,
+        2.0
+      ],
+      "rotation": 0,
+      "material": "pillar"
+    },
+    {
+      "name": "Lobby base",
+      "position": [
+        6.5,
+        0.04,
+        10.0
+      ],
+      "size": [
+        2.2,
+        0.08,
+        2.2
+      ],
+      "rotation": 0,
+      "material": "plinth"
+    },
+    {
+      "name": "Marker 1 face",
+      "position": [
+        5.5,
+        1.25,
+        10.0
+      ],
+      "size": [
+        0.04,
+        0.3,
+        0.3
+      ],
+      "rotation": 0,
+      "material": "marker"
+    },
+    {
+      "name": "Lobby sign",
+      "position": [
+        5.5,
+        1.675,
+        10.0
+      ],
+      "size": [
+        0.045,
+        0.35,
+        1.0
+      ],
+      "rotation": 0,
+      "material": "sign"
+    },
+    {
+      "name": "Pillar 2",
+      "position": [
+        6.5,
+        1.2,
+        -2.0
+      ],
+      "size": [
+        2.0,
+        2.4,
+        2.0
+      ],
+      "rotation": 0,
+      "material": "pillar"
+    },
+    {
+      "name": "Pharmacy base",
+      "position": [
+        6.5,
+        0.04,
+        -2.0
+      ],
+      "size": [
+        2.2,
+        0.08,
+        2.2
+      ],
+      "rotation": 0,
+      "material": "plinth"
+    },
+    {
+      "name": "Marker 2 face",
+      "position": [
+        6.5,
+        1.25,
+        -1.0
+      ],
+      "size": [
+        0.3,
+        0.3,
+        0.04
+      ],
+      "rotation": 0,
+      "material": "marker"
+    },
+    {
+      "name": "Pharmacy sign",
+      "position": [
+        6.5,
+        1.675,
+        -1.0
+      ],
+      "size": [
+        1.0,
+        0.35,
+        0.045
+      ],
+      "rotation": 0,
+      "material": "sign"
+    },
+    {
+      "name": "Pillar 3",
+      "position": [
+        6.5,
+        1.2,
+        -12.0
+      ],
+      "size": [
+        2.0,
+        2.4,
+        2.0
+      ],
+      "rotation": 0,
+      "material": "pillar"
+    },
+    {
+      "name": "X-ray base",
+      "position": [
+        6.5,
+        0.04,
+        -12.0
+      ],
+      "size": [
+        2.2,
+        0.08,
+        2.2
+      ],
+      "rotation": 0,
+      "material": "plinth"
+    },
+    {
+      "name": "Marker 3 face",
+      "position": [
+        6.5,
+        1.25,
+        -11.0
+      ],
+      "size": [
+        0.3,
+        0.3,
+        0.04
+      ],
+      "rotation": 0,
+      "material": "marker"
+    },
+    {
+      "name": "X-ray sign",
+      "position": [
+        6.5,
+        1.675,
+        -11.0
+      ],
+      "size": [
+        1.0,
+        0.35,
+        0.045
+      ],
+      "rotation": 0,
+      "material": "sign"
+    }
+  ],
+  "walls": [
+    [
+      720,
+      465,
+      760,
+      465
+    ],
+    [
+      760,
+      465,
+      760,
+      505
+    ],
+    [
+      760,
+      505,
+      720,
+      505
+    ],
+    [
+      720,
+      505,
+      720,
+      465
+    ],
+    [
+      960,
+      505,
+      1000,
+      505
+    ],
+    [
+      1000,
+      505,
+      1000,
+      545
+    ],
+    [
+      1000,
+      545,
+      960,
+      545
+    ],
+    [
+      960,
+      545,
+      960,
+      505
+    ],
+    [
+      960,
+      265,
+      1000,
+      265
+    ],
+    [
+      1000,
+      265,
+      1000,
+      305
+    ],
+    [
+      1000,
+      305,
+      960,
+      305
+    ],
+    [
+      960,
+      305,
+      960,
+      265
+    ],
+    [
+      960,
+      65,
+      1000,
+      65
+    ],
+    [
+      1000,
+      65,
+      1000,
+      105
+    ],
+    [
+      1000,
+      105,
+      960,
+      105
+    ],
+    [
+      960,
+      105,
+      960,
+      65
+    ]
+  ],
+  "pillars": [
+    {
+      "marker": 0,
+      "x": 740,
+      "y": 485,
+      "size": 40
+    },
+    {
+      "marker": 1,
+      "x": 980,
+      "y": 525,
+      "size": 40
+    },
+    {
+      "marker": 2,
+      "x": 980,
+      "y": 285,
+      "size": 40
+    },
+    {
+      "marker": 3,
+      "x": 980,
+      "y": 85,
+      "size": 40
+    }
+  ],
+  "nodes": {
+    "entrance": {
+      "name": "Entrance",
+      "x": 740,
+      "y": 525,
+      "marker": 0,
+      "facing": 0,
+      "aliases": [
+        "entrance",
+        "main entrance",
+        "front door",
+        "exit"
+      ],
+      "markerFace": "south",
+      "markerPosition": [
+        740,
+        505
+      ]
+    },
+    "lobby": {
+      "name": "Lobby",
+      "x": 940,
+      "y": 525,
+      "marker": 1,
+      "facing": 90,
+      "aliases": [
+        "lobby"
+      ],
+      "markerFace": "west",
+      "markerPosition": [
+        960,
+        525
+      ]
+    },
+    "pharmacy": {
+      "name": "Pharmacy",
+      "x": 940,
+      "y": 325,
+      "marker": 2,
+      "facing": 0,
+      "aliases": [
+        "pharmacy",
+        "medicine",
+        "prescription"
+      ],
+      "markerFace": "south",
+      "markerPosition": [
+        980,
+        305
+      ]
+    },
+    "xray": {
+      "name": "X-ray",
+      "x": 940,
+      "y": 125,
+      "marker": 3,
+      "facing": 0,
+      "aliases": [
+        "x-ray",
+        "x ray",
+        "xray",
+        "radiology",
+        "radiation lab",
+        "imaging",
+        "lab"
+      ],
+      "markerFace": "south",
+      "markerPosition": [
+        980,
+        105
+      ]
+    }
+  },
+  "edges": [
+    [
+      "entrance",
+      "lobby",
+      7
+    ],
+    [
+      "lobby",
+      "pharmacy",
+      7
+    ],
+    [
+      "pharmacy",
+      "xray",
+      7
+    ]
+  ],
+  "destinations": [
+    "pharmacy",
+    "xray"
+  ],
+  "view": {
+    "center": [
+      0,
+      0,
+      0
+    ],
+    "distance": 52
+  }
+}
