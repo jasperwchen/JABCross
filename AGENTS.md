@@ -111,8 +111,11 @@ Geometry and guidance rules:
 - Guidance priority: blocked camera, center obstacle under about 1 m, turn error
   over about 15 degrees, next marker under about 1.2 m/arrival, then forward steps.
   Do not repeat the same line within about 3 seconds.
-- The viewer currently exposes `window.jabCross.setMarker(markerId)` as an adapter;
-  live state/depth polling is planned. Verify connections before presenting it as live.
+- The viewer exposes `window.jabCross.setMarker(markerId)` as an adapter. The current
+  video uses a scripted hospital walkthrough alongside separate real phone footage;
+  live state/depth polling is deferred. The café viewer defaults to first person,
+  with countdown, pace, pause/reset and overhead/3D controls. Hospital scenery is
+  generated only into `demo/maps/cafe/`; the phone's active map stays unchanged.
 
 ## Phone constraints and demo validation
 

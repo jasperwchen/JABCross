@@ -8,6 +8,15 @@
 
 ## Do this now
 
+Current video plan: record the real phone camera demo beside a separately scripted
+hospital walkthrough. The website does not track the phone live. Its default café
+route uses hospital scenery and first-person/3D/overhead views, with a countdown,
+pace control and pause/reset for filming. The phone map and API stay unchanged.
+
+- [x] Hospital walkthrough: first-person scene, filming controls, geometry checks and viewer reviews complete.
+- [x] Hospital visual polish: lighting/shadows, materials, mounted signs and room details; geometry checks, browser route and both reviews passed.
+- [ ] Publish the updated viewer to the existing website (requires Sites editor access).
+
 - **Jasper**: pause the viewer. Start `server/nav.py` (the navigator). Without it there is no product.
 - **Brian**: `pip install -r server/requirements.txt`, then `python server/live_depth.py` to check depth
   and markers on the laptop webcam, then `python server/app.py` behind the tunnel.
@@ -31,8 +40,8 @@ PHONE (worn on chest)                  LAPTOP (one FastAPI server, one tunnel)
   speak            <------ reply ------
 
 LAPTOP SCREEN (for the video)
-  /map/ viewer  -- GET /state every 1 s  -->  live dot on the Grady plan
-                -- GET /depth.jpg ------->  depth map in a corner
+  /map/ viewer  --> scripted hospital route, cued alongside phone footage
+                   independent countdown, pace, pause and reset
 ```
 
 ## Endpoints (all on the one server)
@@ -129,8 +138,8 @@ and rerun it. Jasper adds three fields:
 - [x] **Map fields**: add `aliases`, `facing`, `steps` in `build_model.py`.
 - [ ] **By 1:00, with Ayan**: adjust the chosen route's node positions so its turns match the venue's
       hallways. The navigator takes turn angles from the map, so a mismatch gives wrong directions on camera.
-- [ ] **Viewer, live**: poll `GET /state` every 1 s and call `setMarker` when the node changes.
-      Show `/depth.jpg` in a corner, refreshed every ~0.5 s.
+- [ ] **Viewer, live (deferred)**: live phone tracking is deferred; the video uses a
+      separate scripted route viewer alongside real phone footage.
 
 ## Ayan (C): phone + voice + video
 

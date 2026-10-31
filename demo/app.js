@@ -2,28 +2,84 @@ import * as THREE from 'three';
 import {OrbitControls} from './vendor/OrbitControls.js';
 const $=s=>document.querySelector(s), host=$('#viewport');
 try {
-const venue=new URLSearchParams(location.search).get('map')==='cafe'?'cafe':'hospital';
+const venue=new URLSearchParams(location.search).get('map')==='hospital'?'hospital':'cafe';
 const mapBase=`./maps/${venue}/`;
-const data=await fetch(mapBase+'grady-ground.json').then(r=>{if(!r.ok)throw Error('Map data unavailable');return r.json()});
+const data=await fetch(mapBase+'grady-ground.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Map data unavailable');return r.json()});
 const cafe=data.venue==='cafe';
+let viewMode=cafe?'pov':'angled';
+const ceilings=[];
 for(const link of document.querySelectorAll('.map-tabs a'))if(link.dataset.map===venue)link.setAttribute('aria-current','page');
 for(const link of document.querySelectorAll('footer a[download]'))link.href=mapBase+link.getAttribute('href');
 $('#start-name').textContent=data.nodes.entrance.name+' · Marker 0';
-$('#venue').textContent=cafe?'GSMST cafeteria demo':'Grady Memorial Hospital';
-$('#map-heading').textContent=cafe?'GSMST cafeteria demo':'Grady Memorial Hospital';
-document.title=cafe?'JabCross · GSMST cafeteria demo':'JabCross · Grady Memorial Hospital';
+$('#venue').textContent=cafe?'Hospital route demo':'Grady Memorial Hospital';
+$('#map-heading').textContent=cafe?'Hospital route demo':'Grady Memorial Hospital';
+document.title=cafe?'JabCross · Hospital route demo':'JabCross · Grady Memorial Hospital';
 $('#destination').replaceChildren(...data.destinations.map(id=>{const option=document.createElement('option');option.value=id;option.textContent=data.nodes[id].name;return option}));
 if(cafe)$('#destination').value='xray';
-if(!cafe){$('#map-description').textContent='Plan a route through the entrance and outpatient area, then preview the walk.';$('#scope').textContent='Ground floor · GMH-G';$('#map-scope').textContent='Entrance / outpatient area';$('#route-note').textContent='Based on the Grady floor plan. Routes and distances are illustrative and have not been validated for patient use.'}
+if(!cafe){for(const option of $('#pace').options)option.textContent=option.textContent.split(' · ')[0];$('#map-description').textContent='Plan a route through the entrance and outpatient area, then preview the walk.';$('#scope').textContent='Ground floor · GMH-G';$('#map-scope').textContent='Entrance / outpatient area';$('#route-note').textContent='Based on the Grady floor plan. Routes and distances are illustrative and have not been validated for patient use.'}
 const scene=new THREE.Scene();scene.background=new THREE.Color('#eef0e8');
 const camera=new THREE.PerspectiveCamera(42,1,.1,500);camera.position.set(4,73,64);
 const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));host.appendChild(renderer.domElement);
 const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.maxPolarAngle=Math.PI*.46;controls.minDistance=15;controls.maxDistance=320;
-scene.add(new THREE.HemisphereLight(0xffffff,0x809083,2.4));const light=new THREE.DirectionalLight(0xffffff,2.2);light.position.set(-20,60,30);scene.add(light);
+scene.add(new THREE.HemisphereLight(0xffffff,data.interior?0xbcc8ce:0x809083,data.interior?1.5:2.4));
+const light=new THREE.DirectionalLight(0xffffff,data.interior?.45:2.2);light.position.set(-20,60,30);scene.add(light);
 const xyz=(x,y,h=.2)=>new THREE.Vector3(x/20-42.5,h,y/20-16.25);
 const materials=Object.fromEntries(Object.entries(data.palette).map(([name,color])=>[name,new THREE.MeshStandardMaterial({color,roughness:.8,metalness:name==='metal'?.15:0})]));
+if(data.interior){
+ renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+ renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ materials.floor.roughness=.42;materials.wall.roughness=.95;materials.pillar.roughness=.9;
+ materials.metal.roughness=.35;materials.metal.metalness=.65;
+ materials.wood.roughness=.65;materials.glass.roughness=.18;materials.glass.metalness=.15;
+ materials.ceiling.emissive.set(0xffffff);materials.ceiling.emissiveIntensity=.12;
+ materials.light.emissive.set(0xfff5df);materials.light.emissiveIntensity=2;
+ // Small repeatable canvas textures keep the viewer self-contained and offline.
+ for(const name of ['floor','wood']){
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=256;
+  const ctx=canvas.getContext('2d');ctx.fillStyle=name==='floor'?'#eeeeea':'#f0dfca';ctx.fillRect(0,0,256,256);
+  for(let i=0;i<3000;i++){
+   const x=(i*73)%256,y=(i*137+Math.floor(i/256)*17)%256;
+   ctx.fillStyle=name==='floor'?'rgba(72,91,94,.07)':'rgba(97,65,35,.035)';
+   ctx.fillRect(x,y,name==='floor'?1:1,name==='floor'?1:24+(i%61));
+  }
+  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
+  texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
+  texture.repeat.set(name==='floor'?11:2,name==='floor'?16.5:1);
+  texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());materials[name].map=texture;
+ }
+}
 const cube=new THREE.BoxGeometry(1,1,1);
-for(const obj of data.objects){const mesh=new THREE.Mesh(cube,materials[obj.material]);mesh.name=obj.name;mesh.position.fromArray(obj.position);mesh.scale.fromArray(obj.size);mesh.rotation.y=obj.rotation;if(obj.material==='wall'){const edge=new THREE.LineSegments(new THREE.EdgesGeometry(cube),new THREE.LineBasicMaterial({color:0x93a99b,transparent:true,opacity:.45}));mesh.add(edge)}scene.add(mesh)}
+let shadowLights=0;
+for(const obj of data.objects){
+ const mesh=new THREE.Mesh(cube,materials[obj.material]);mesh.name=obj.name;
+ mesh.position.fromArray(obj.position);mesh.scale.fromArray(obj.size);mesh.rotation.y=obj.rotation;
+ const ceiling=obj.material.startsWith('ceiling')||obj.material==='light';
+ if(ceiling)ceilings.push(mesh);
+ mesh.receiveShadow=Boolean(data.interior)&&!ceiling;
+ mesh.castShadow=Boolean(data.interior)&&!ceiling&&obj.size[1]>.1;
+ if(obj.material==='wall'&&!cafe){const edge=new THREE.LineSegments(new THREE.EdgesGeometry(cube),new THREE.LineBasicMaterial({color:0x93a99b,transparent:true,opacity:.45}));mesh.add(edge)}
+ scene.add(mesh);
+ if(data.interior&&obj.material==='light'){
+  const lamp=new THREE.SpotLight(0xfff5e8,65,20,Math.PI*.38,.75,2);
+  lamp.position.copy(mesh.position);lamp.position.y-=.12;
+  lamp.target.position.set(mesh.position.x,0,mesh.position.z);scene.add(lamp.target, lamp);
+  // Two static shadow maps cover the corridor without a shadow pass for every lamp.
+  lamp.castShadow=shadowLights<2&&(mesh.position.z<0||mesh.position.x<0);
+  if(lamp.castShadow){shadowLights++;lamp.shadow.mapSize.set(1024,1024);lamp.shadow.camera.near=.1;lamp.shadow.camera.far=20;lamp.shadow.bias=-.0002;lamp.shadow.normalBias=.025;lamp.shadow.autoUpdate=false;lamp.shadow.needsUpdate=true}
+ }
+}
+// In-world signs stay attached to the walls instead of floating through them.
+for(const sign of data.signs??[]){
+ const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=256;
+ const ctx=canvas.getContext('2d');ctx.fillStyle='#174e60';ctx.fillRect(0,0,1024,256);
+ ctx.fillStyle='#ffffff';ctx.font='bold 70px sans-serif';ctx.fillText(sign.text,40,108);
+ ctx.font='36px sans-serif';ctx.fillText(sign.detail,40,190);
+ const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
+ const mesh=new THREE.Mesh(new THREE.PlaneGeometry(sign.width??3.6,(sign.width??3.6)/4),new THREE.MeshStandardMaterial({map:texture,roughness:.75}));
+ mesh.position.copy(xyz(sign.x,sign.y,sign.height));mesh.rotation.y=sign.rotation;
+ // Keep the lettering just in front of its backing to prevent depth flicker.
+ mesh.position.x+=Math.sin(sign.rotation)*.015;mesh.position.z+=Math.cos(sign.rotation)*.015;scene.add(mesh);
+}
 // The SVG covers the whole sheet. Crop it to the same PDF coordinates as the modeled area.
 // Original raster reference: longest side 4200 px, crop (1550,1850,1700,650).
 if(!cafe){
@@ -57,6 +113,7 @@ const labelMeasure=document.createElement('canvas').getContext('2d');labelMeasur
 for(const label of labels)label.pixelWidth=Math.ceil(labelMeasure.measureText(label.el.textContent).width)+18;
 const occupied=[],projected=new THREE.Vector3();
 function updateLabels(){
+ if(viewMode==='pov'){for(const label of labels)label.el.hidden=true;return}
  const width=host.clientWidth,height=host.clientHeight,hostRect=host.getBoundingClientRect();
  occupied.length=0;
  // Reserve screen chrome so labels never obscure view controls or the legend.
@@ -110,40 +167,82 @@ function updateSight(){
   mesh.material=seen?markerSeen:markerIdle;mesh.scale.setScalar(seen?1.5:1);
  }
 }
+let countdown=0,walkTime=0;
 let path=[],routeIds=[],route,playing=false,offRoute=false,segment=0,fraction=0,last=0,elapsed=0,total=0,heading=0,targetHeading=0;
 const legHeading=i=>Math.atan2(path[i+1].x-path[i].x,-(path[i+1].z-path[i].z));
 function shortest(target){const distances={entrance:0},previous={},todo=new Set(Object.keys(data.nodes));while(todo.size){let u=[...todo].reduce((a,b)=>(distances[a]??Infinity)<(distances[b]??Infinity)?a:b);todo.delete(u);if(u===target)break;for(const [a,b,w] of data.edges){let v=a===u?b:b===u?a:null;if(v&&todo.has(v)&&(distances[u]??Infinity)+w<(distances[v]??Infinity)){distances[v]=distances[u]+w;previous[v]=u}}}const result=[target];while(result[0]!=='entrance'){const n=previous[result[0]];if(!n)throw Error('Destination is unreachable');result.unshift(n)}return result}
 function say(text){$('#guidance').textContent=text;if($('#voice').checked&&'speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(text))}}
 function instruction(i,fromHeading){const error=Math.atan2(Math.sin(legHeading(i)-fromHeading),Math.cos(legHeading(i)-fromHeading))*180/Math.PI;const edge=data.edges.find(([a,b])=>a===routeIds[i]&&b===routeIds[i+1]||b===routeIds[i]&&a===routeIds[i+1]);return `${Math.abs(error)>15?`Turn ${error>0?'right':'left'} about ${Math.round(Math.abs(error)/5)*5} degrees. `:''}Walk forward about ${edge[2]} steps.`}
-function reset(){playing=false;offRoute=false;segment=0;fraction=0;elapsed=0;$('#play').textContent='Simulate walk';$('#progress').value=0;dot.position.copy(path[0]);heading=targetHeading=THREE.MathUtils.degToRad(data.nodes.entrance.facing);say('Ready at the entrance. Facing marker 0.')}
-function choose(){if(route){scene.remove(route);route.geometry.dispose();route.material.dispose()}routeIds=shortest($('#destination').value);path=routeIds.map(id=>{const n=data.nodes[id];return xyz(n.x,n.y,.65)});total=path.slice(1).reduce((s,p,i)=>s+p.distanceTo(path[i]),0);route=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshBasicMaterial());route.geometry.dispose();const curve=new THREE.CurvePath();for(let i=1;i<path.length;i++)curve.add(new THREE.LineCurve3(path[i-1],path[i]));route.geometry=new THREE.TubeGeometry(curve,Math.ceil(total*3),.13,8,false);route.material.color.set(0x14856c);scene.add(route);$('#target').textContent=data.nodes[$('#destination').value].name;reset()}
-$('#destination').onchange=choose;$('#reset').onclick=reset;$('#play').onclick=()=>{if(offRoute||segment>=path.length-1)reset();playing=!playing;$('#play').textContent=playing?'Pause walk':'Resume walk';if(playing){say(instruction(segment,heading));targetHeading=legHeading(segment)}};
-let overhead=false;
-function view(top){overhead=top;const distance=data.view?.distance??100;camera.position.set(...(top?[0,distance,.01]:[distance*.3,distance*.73,distance*.64]));camera.position.multiplyScalar(Math.max(1,1.3/camera.aspect));controls.target.fromArray(data.view?.center??[0,0,0]);$('#top').setAttribute('aria-pressed',top);$('#angled').setAttribute('aria-pressed',!top);controls.update()}$('#top').onclick=()=>view(true);$('#angled').onclick=()=>view(false);
+function reset(){countdown=0;walkTime=0;$('#timer').textContent='00:00';playing=false;offRoute=false;segment=0;fraction=0;elapsed=0;$('#play').textContent='Start scripted walk';$('#progress').value=0;dot.position.copy(path[0]);heading=targetHeading=THREE.MathUtils.degToRad(data.nodes.entrance.facing);if('speechSynthesis'in window)speechSynthesis.cancel();say('Ready at the entrance. Facing marker 0.')}
+function choose(){if(route){scene.remove(route);route.geometry.dispose();route.material.dispose()}routeIds=shortest($('#destination').value);path=routeIds.map(id=>{const n=data.nodes[id];return xyz(n.x,n.y,.65)});total=path.slice(1).reduce((s,p,i)=>s+p.distanceTo(path[i]),0);route=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshBasicMaterial());route.geometry.dispose();const curve=new THREE.CurvePath();for(let i=1;i<path.length;i++)curve.add(new THREE.LineCurve3(path[i-1],path[i]));route.geometry=new THREE.TubeGeometry(curve,Math.ceil(total*3),.13,8,false);route.material.color.set(0x14856c);scene.add(route);route.visible=viewMode!=='pov';$('#target').textContent=data.nodes[$('#destination').value].name;reset()}
+$('#destination').onchange=choose;$('#reset').onclick=reset;
+$('#play').onclick=()=>{
+ if(offRoute||segment>=path.length-1)reset();
+ playing=!playing;last=performance.now();$('#play').textContent=playing?'Pause walk':'Resume walk';
+ if(playing){
+  if(walkTime===0&&countdown===0)countdown=3;
+  if(countdown===0)say(instruction(segment,heading));
+  targetHeading=legHeading(segment);
+ }else if('speechSynthesis'in window)speechSynthesis.cancel();
+};
+function followWalker(){
+ // Leave a little viewing distance at the staged marker stops.
+ const setback=data.interior?1.2:0;
+ camera.position.set(dot.position.x-Math.sin(heading)*setback,data.interior?3.2:1.5,dot.position.z+Math.cos(heading)*setback);
+ camera.lookAt(camera.position.x+Math.sin(heading),camera.position.y,camera.position.z-Math.cos(heading));
+}
+function view(mode){
+ viewMode=mode;const pov=mode==='pov';controls.enabled=!pov;
+ camera.fov=pov?72:42;camera.updateProjectionMatrix();
+ host.classList.toggle('first-person',pov);
+ dot.visible=beam.visible=!pov;for(const marker of markers)marker.visible=!pov;
+ for(const ceiling of ceilings)ceiling.visible=pov;
+ if(route)route.visible=!pov;
+ for(const name of ['pov','top','angled'])$('#'+name).setAttribute('aria-pressed',name===mode);
+ $('.hint').textContent=pov?'Eye-level view · Camera follows the scripted route':'Drag to rotate · Scroll to zoom · Right-drag to pan';
+ if(pov){followWalker();return}
+ const distance=data.view?.distance??100;
+ camera.position.set(...(mode==='top'?[0,distance,.01]:[distance*.3,distance*.73,distance*.64]));
+ camera.position.multiplyScalar(Math.max(1,1.3/camera.aspect));
+ controls.target.fromArray(data.view?.center??[0,0,0]);controls.update();
+}
+for(const mode of ['pov','top','angled'])$('#'+mode).onclick=()=>view(mode);
 // Explicit adapter for the team's future perception integration. Does not infer live tracking.
-window.jabCross={setMarker(id){const key=Object.keys(data.nodes).find(k=>data.nodes[k].marker===id);if(!key)return false;const node=data.nodes[key],at=routeIds.indexOf(key);playing=false;offRoute=at<0;if(!offRoute){segment=at;fraction=0;elapsed=path.slice(1,at+1).reduce((s,p,i)=>s+p.distanceTo(path[i]),0);$('#progress').value=elapsed/total}$('#play').textContent=offRoute||at===path.length-1?'Replay walk':'Resume simulation';dot.position.copy(xyz(node.x,node.y,.65));heading=targetHeading=THREE.MathUtils.degToRad(node.facing);say('Marker received: '+node.name);return true},map:data};
-function resize(){camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();renderer.setSize(host.clientWidth,host.clientHeight);view(overhead)}new ResizeObserver(resize).observe(host);resize();view(cafe);choose();
+window.jabCross={setMarker(id){const key=Object.keys(data.nodes).find(k=>data.nodes[k].marker===id);if(!key)return false;const node=data.nodes[key],at=routeIds.indexOf(key);playing=false;countdown=0;offRoute=at<0;if(!offRoute){segment=at;fraction=0;elapsed=path.slice(1,at+1).reduce((s,p,i)=>s+p.distanceTo(path[i]),0);$('#progress').value=elapsed/total}$('#play').textContent=offRoute||at===path.length-1?'Replay walk':'Resume simulation';dot.position.copy(xyz(node.x,node.y,.65));heading=targetHeading=THREE.MathUtils.degToRad(node.facing);say('Marker received: '+node.name);return true},map:data};
+function resize(){camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();renderer.setSize(host.clientWidth,host.clientHeight);view(viewMode)}choose();new ResizeObserver(resize).observe(host);resize();
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden&&playing){playing=false;$('#play').textContent='Resume walk';if('speechSynthesis'in window)speechSynthesis.cancel()}
+});
 function animate(t){
  requestAnimationFrame(animate);
- const dt=Math.min((t-last)/1000,.05);last=t;
- if(playing&&segment<path.length-1){
-  const turn=Math.atan2(Math.sin(targetHeading-heading),Math.cos(targetHeading-heading));
-  let budget=Math.abs(turn)<.04?dt*5:0;
-  while(budget>0&&segment<path.length-1){
-   const len=path[segment].distanceTo(path[segment+1]),step=Math.min(budget,len*(1-fraction));
-   fraction+=step/len;elapsed+=step;budget-=step;
+ let dt=Math.max(0,(t-last)/1000);last=t;
+ if(playing&&countdown>0){
+  const used=Math.min(dt,countdown);countdown-=used;dt-=used;
+  $('#guidance').textContent='Starting in '+Math.ceil(countdown)+'…';
+  if(countdown===0)say(instruction(segment,heading));
+ }
+ if(playing&&countdown===0&&segment<path.length-1){
+  let remaining=dt;
+  while(remaining>0&&segment<path.length-1){
+   const turn=Math.atan2(Math.sin(targetHeading-heading),Math.cos(targetHeading-heading));
+   const turnTime=Math.min(remaining,Math.abs(turn)/TURN_SPEED);
+   heading+=Math.sign(turn)*turnTime*TURN_SPEED;remaining-=turnTime;
+   if(remaining<=0)break;
+   const len=path[segment].distanceTo(path[segment+1]),speed=Number($('#pace').value);
+   const step=Math.min(remaining*speed,len*(1-fraction));
+   fraction+=step/len;elapsed+=step;remaining=Math.max(0,remaining-step/speed);
    dot.position.lerpVectors(path[segment],path[segment+1],Math.min(fraction,1));
    if(fraction>=.999999){
-    segment++;fraction=0;budget=0;
+    segment++;fraction=0;
     if(segment===path.length-1){playing=false;$('#play').textContent='Replay walk';say('You have arrived at '+$('#target').textContent+'.')}
     else{say(instruction(segment,legHeading(segment-1)));targetHeading=legHeading(segment)}
-   }
+   }else break;
   }
+  walkTime+=dt-remaining;
+  $('#timer').textContent=String(Math.floor(walkTime/60)).padStart(2,'0')+':'+String(Math.floor(walkTime%60)).padStart(2,'0');
   $('#progress').value=Math.min(elapsed/total,1);
-  const remainingTurn=Math.atan2(Math.sin(targetHeading-heading),Math.cos(targetHeading-heading));
-  heading+=Math.sign(remainingTurn)*Math.min(Math.abs(remainingTurn),dt*TURN_SPEED);
  }
- updateSight();controls.update();updateLabels();renderer.render(scene,camera);
+ updateSight();if(viewMode==='pov')followWalker();else controls.update();updateLabels();renderer.render(scene,camera);
 }requestAnimationFrame(animate);
 } catch(error){$('#error').textContent='Could not load the 3D viewer: '+error.message;console.error(error)}
 

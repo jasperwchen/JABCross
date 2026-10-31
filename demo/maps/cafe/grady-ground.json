@@ -1,6 +1,6 @@
 {
   "venue": "cafe",
-  "title": "Cafeteria demo",
+  "title": "Hospital route demo",
   "source": "cafe-route-sketch.png; final staging in AGENT-HANDOFF.md",
   "units": "Illustrative plan units; each 200-unit leg is approximately 5 m; edge values are estimated steps",
   "coordinateSystem": "x right, y down; 3D x=x/20-42.5, z=y/20-16.25",
@@ -8,11 +8,22 @@
   "rooms": [],
   "facilities": [],
   "palette": {
-    "floor": "#edf0e9",
-    "pillar": "#b9c6bc",
+    "floor": "#e2e7e5",
+    "pillar": "#e2e7e4",
     "plinth": "#dde4db",
     "marker": "#2864aa",
-    "sign": "#f9fbf7"
+    "sign": "#f9fbf7",
+    "wall": "#eef1ef",
+    "trim": "#739a9c",
+    "metal": "#aebbc2",
+    "wood": "#bf9c72",
+    "glass": "#94c6d1",
+    "seat": "#286f7b",
+    "plaque": "#174e60",
+    "ceiling": "#f4f6f5",
+    "ceiling_grid": "#c9d2d2",
+    "light": "#ffffff",
+    "grout": "#bfcaca"
   },
   "objects": [
     {
@@ -34,12 +45,12 @@
       "name": "Pillar 0",
       "position": [
         -5.5,
-        1.2,
+        3,
         8.0
       ],
       "size": [
         2.0,
-        2.4,
+        6,
         2.0
       ],
       "rotation": 0,
@@ -64,7 +75,7 @@
       "name": "Marker 0 face",
       "position": [
         -5.5,
-        1.25,
+        2.5,
         9.0
       ],
       "size": [
@@ -76,30 +87,15 @@
       "material": "marker"
     },
     {
-      "name": "Entrance sign",
-      "position": [
-        -5.5,
-        1.675,
-        9.0
-      ],
-      "size": [
-        1.0,
-        0.35,
-        0.045
-      ],
-      "rotation": 0,
-      "material": "sign"
-    },
-    {
       "name": "Pillar 1",
       "position": [
         6.5,
-        1.2,
+        3,
         10.0
       ],
       "size": [
         2.0,
-        2.4,
+        6,
         2.0
       ],
       "rotation": 0,
@@ -124,7 +120,7 @@
       "name": "Marker 1 face",
       "position": [
         5.5,
-        1.25,
+        2.5,
         10.0
       ],
       "size": [
@@ -136,30 +132,15 @@
       "material": "marker"
     },
     {
-      "name": "Lobby sign",
-      "position": [
-        5.5,
-        1.675,
-        10.0
-      ],
-      "size": [
-        0.045,
-        0.35,
-        1.0
-      ],
-      "rotation": 0,
-      "material": "sign"
-    },
-    {
       "name": "Pillar 2",
       "position": [
         6.5,
-        1.2,
+        3,
         -2.0
       ],
       "size": [
         2.0,
-        2.4,
+        6,
         2.0
       ],
       "rotation": 0,
@@ -184,7 +165,7 @@
       "name": "Marker 2 face",
       "position": [
         6.5,
-        1.25,
+        2.5,
         -1.0
       ],
       "size": [
@@ -196,30 +177,15 @@
       "material": "marker"
     },
     {
-      "name": "Pharmacy sign",
-      "position": [
-        6.5,
-        1.675,
-        -1.0
-      ],
-      "size": [
-        1.0,
-        0.35,
-        0.045
-      ],
-      "rotation": 0,
-      "material": "sign"
-    },
-    {
       "name": "Pillar 3",
       "position": [
         6.5,
-        1.2,
+        3,
         -12.0
       ],
       "size": [
         2.0,
-        2.4,
+        6,
         2.0
       ],
       "rotation": 0,
@@ -244,7 +210,7 @@
       "name": "Marker 3 face",
       "position": [
         6.5,
-        1.25,
+        2.5,
         -11.0
       ],
       "size": [
@@ -256,19 +222,2119 @@
       "material": "marker"
     },
     {
-      "name": "X-ray sign",
+      "name": "Corridor wall 0",
       "position": [
-        6.5,
-        1.675,
-        -11.0
+        0.5,
+        3.0,
+        12.75
       ],
       "size": [
-        1.0,
+        18.0,
+        6,
+        0.25
+      ],
+      "rotation": 0,
+      "material": "wall"
+    },
+    {
+      "name": "Wall protection 0",
+      "position": [
+        0.5,
+        1.6800000000000002,
+        12.75
+      ],
+      "size": [
+        18.05,
+        0.16,
+        0.3
+      ],
+      "rotation": 0,
+      "material": "trim"
+    },
+    {
+      "name": "Handrail 0",
+      "position": [
+        0.5,
+        1.9100000000000001,
+        12.75
+      ],
+      "size": [
+        18.15,
+        0.12,
+        0.4
+      ],
+      "rotation": 0,
+      "material": "wood"
+    },
+    {
+      "name": "Skirting 0",
+      "position": [
+        0.5,
+        0.125,
+        12.75
+      ],
+      "size": [
+        18.05,
+        0.25,
+        0.3
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Corridor wall 1",
+      "position": [
+        9.5,
+        3.0,
+        -0.5
+      ],
+      "size": [
+        0.25,
+        6,
+        26.5
+      ],
+      "rotation": 0,
+      "material": "wall"
+    },
+    {
+      "name": "Wall protection 1",
+      "position": [
+        9.5,
+        1.6800000000000002,
+        -0.5
+      ],
+      "size": [
+        0.3,
+        0.16,
+        26.55
+      ],
+      "rotation": 0,
+      "material": "trim"
+    },
+    {
+      "name": "Handrail 1",
+      "position": [
+        9.5,
+        1.9100000000000001,
+        -0.5
+      ],
+      "size": [
+        0.4,
+        0.12,
+        26.65
+      ],
+      "rotation": 0,
+      "material": "wood"
+    },
+    {
+      "name": "Skirting 1",
+      "position": [
+        9.5,
+        0.125,
+        -0.5
+      ],
+      "size": [
+        0.3,
+        0.25,
+        26.55
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Corridor wall 2",
+      "position": [
+        5.5,
+        3.0,
+        -13.75
+      ],
+      "size": [
+        8.0,
+        6,
+        0.25
+      ],
+      "rotation": 0,
+      "material": "wall"
+    },
+    {
+      "name": "Wall protection 2",
+      "position": [
+        5.5,
+        1.6800000000000002,
+        -13.75
+      ],
+      "size": [
+        8.05,
+        0.16,
+        0.3
+      ],
+      "rotation": 0,
+      "material": "trim"
+    },
+    {
+      "name": "Handrail 2",
+      "position": [
+        5.5,
+        1.9100000000000001,
+        -13.75
+      ],
+      "size": [
+        8.15,
+        0.12,
+        0.4
+      ],
+      "rotation": 0,
+      "material": "wood"
+    },
+    {
+      "name": "Skirting 2",
+      "position": [
+        5.5,
+        0.125,
+        -13.75
+      ],
+      "size": [
+        8.05,
+        0.25,
+        0.3
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Corridor wall 3",
+      "position": [
+        1.5,
+        3.0,
+        -3.75
+      ],
+      "size": [
+        0.25,
+        6,
+        20.0
+      ],
+      "rotation": 0,
+      "material": "wall"
+    },
+    {
+      "name": "Wall protection 3",
+      "position": [
+        1.5,
+        1.6800000000000002,
+        -3.75
+      ],
+      "size": [
+        0.3,
+        0.16,
+        20.05
+      ],
+      "rotation": 0,
+      "material": "trim"
+    },
+    {
+      "name": "Handrail 3",
+      "position": [
+        1.5,
+        1.9100000000000001,
+        -3.75
+      ],
+      "size": [
+        0.4,
+        0.12,
+        20.15
+      ],
+      "rotation": 0,
+      "material": "wood"
+    },
+    {
+      "name": "Skirting 3",
+      "position": [
+        1.5,
+        0.125,
+        -3.75
+      ],
+      "size": [
+        0.3,
+        0.25,
+        20.05
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Corridor wall 4",
+      "position": [
+        -3.5,
+        3.0,
+        6.25
+      ],
+      "size": [
+        10.0,
+        6,
+        0.25
+      ],
+      "rotation": 0,
+      "material": "wall"
+    },
+    {
+      "name": "Wall protection 4",
+      "position": [
+        -3.5,
+        1.6800000000000002,
+        6.25
+      ],
+      "size": [
+        10.05,
+        0.16,
+        0.3
+      ],
+      "rotation": 0,
+      "material": "trim"
+    },
+    {
+      "name": "Handrail 4",
+      "position": [
+        -3.5,
+        1.9100000000000001,
+        6.25
+      ],
+      "size": [
+        10.15,
+        0.12,
+        0.4
+      ],
+      "rotation": 0,
+      "material": "wood"
+    },
+    {
+      "name": "Skirting 4",
+      "position": [
+        -3.5,
+        0.125,
+        6.25
+      ],
+      "size": [
+        10.05,
+        0.25,
+        0.3
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Corridor wall 5",
+      "position": [
+        -8.5,
+        3.0,
+        9.5
+      ],
+      "size": [
+        0.25,
+        6,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "wall"
+    },
+    {
+      "name": "Wall protection 5",
+      "position": [
+        -8.5,
+        1.6800000000000002,
+        9.5
+      ],
+      "size": [
+        0.3,
+        0.16,
+        6.55
+      ],
+      "rotation": 0,
+      "material": "trim"
+    },
+    {
+      "name": "Handrail 5",
+      "position": [
+        -8.5,
+        1.9100000000000001,
+        9.5
+      ],
+      "size": [
+        0.4,
+        0.12,
+        6.65
+      ],
+      "rotation": 0,
+      "material": "wood"
+    },
+    {
+      "name": "Skirting 5",
+      "position": [
+        -8.5,
+        0.125,
+        9.5
+      ],
+      "size": [
+        0.3,
+        0.25,
+        6.55
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Ceiling panel",
+      "position": [
+        0.5,
+        6.06,
+        9.5
+      ],
+      "size": [
+        18.0,
+        0.12,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "ceiling"
+    },
+    {
+      "name": "Ceiling panel",
+      "position": [
+        5.5,
+        6.06,
+        -3.75
+      ],
+      "size": [
+        8.0,
+        0.12,
+        20.0
+      ],
+      "rotation": 0,
+      "material": "ceiling"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        5.5,
+        0.0075,
+        -12.75
+      ],
+      "size": [
+        8.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        5.5,
+        5.9825,
+        -12.75
+      ],
+      "size": [
+        8.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        5.5,
+        0.0075,
+        -11.25
+      ],
+      "size": [
+        8.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        5.5,
+        5.9825,
+        -11.25
+      ],
+      "size": [
+        8.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        5.5,
+        0.0075,
+        -9.75
+      ],
+      "size": [
+        8.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        5.5,
+        5.9825,
+        -9.75
+      ],
+      "size": [
+        8.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        5.5,
+        0.0075,
+        -8.25
+      ],
+      "size": [
+        8.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        5.5,
+        5.9825,
+        -8.25
+      ],
+      "size": [
+        8.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        5.5,
+        0.0075,
+        -6.75
+      ],
+      "size": [
+        8.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        5.5,
+        5.9825,
+        -6.75
+      ],
+      "size": [
+        8.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        5.5,
+        0.0075,
+        -5.25
+      ],
+      "size": [
+        8.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        5.5,
+        5.9825,
+        -5.25
+      ],
+      "size": [
+        8.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        5.5,
+        0.0075,
+        -3.75
+      ],
+      "size": [
+        8.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        5.5,
+        5.9825,
+        -3.75
+      ],
+      "size": [
+        8.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        5.5,
+        0.0075,
+        -2.25
+      ],
+      "size": [
+        8.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        5.5,
+        5.9825,
+        -2.25
+      ],
+      "size": [
+        8.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        5.5,
+        0.0075,
+        -0.75
+      ],
+      "size": [
+        8.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        5.5,
+        5.9825,
+        -0.75
+      ],
+      "size": [
+        8.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        5.5,
+        0.0075,
+        0.75
+      ],
+      "size": [
+        8.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        5.5,
+        5.9825,
+        0.75
+      ],
+      "size": [
+        8.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        5.5,
+        0.0075,
+        2.25
+      ],
+      "size": [
+        8.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        5.5,
+        5.9825,
+        2.25
+      ],
+      "size": [
+        8.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        5.5,
+        0.0075,
+        3.75
+      ],
+      "size": [
+        8.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        5.5,
+        5.9825,
+        3.75
+      ],
+      "size": [
+        8.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        5.5,
+        0.0075,
+        5.25
+      ],
+      "size": [
+        8.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        5.5,
+        5.9825,
+        5.25
+      ],
+      "size": [
+        8.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        0.5,
+        0.0075,
+        6.75
+      ],
+      "size": [
+        18.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        0.5,
+        5.9825,
+        6.75
+      ],
+      "size": [
+        18.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        0.5,
+        0.0075,
+        8.25
+      ],
+      "size": [
+        18.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        0.5,
+        5.9825,
+        8.25
+      ],
+      "size": [
+        18.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        0.5,
+        0.0075,
+        9.75
+      ],
+      "size": [
+        18.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        0.5,
+        5.9825,
+        9.75
+      ],
+      "size": [
+        18.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        0.5,
+        0.0075,
+        11.25
+      ],
+      "size": [
+        18.0,
+        0.005,
+        0.0125
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        0.5,
+        5.9825,
+        11.25
+      ],
+      "size": [
+        18.0,
+        0.025,
+        0.017499999999999998
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        -7.5,
+        0.0075,
+        9.5
+      ],
+      "size": [
+        0.0125,
+        0.005,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        -7.5,
+        5.9825,
+        9.5
+      ],
+      "size": [
+        0.017499999999999998,
+        0.025,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        -6.0,
+        0.0075,
+        9.5
+      ],
+      "size": [
+        0.0125,
+        0.005,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        -6.0,
+        5.9825,
+        9.5
+      ],
+      "size": [
+        0.017499999999999998,
+        0.025,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        -4.5,
+        0.0075,
+        9.5
+      ],
+      "size": [
+        0.0125,
+        0.005,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        -4.5,
+        5.9825,
+        9.5
+      ],
+      "size": [
+        0.017499999999999998,
+        0.025,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        -3.0,
+        0.0075,
+        9.5
+      ],
+      "size": [
+        0.0125,
+        0.005,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        -3.0,
+        5.9825,
+        9.5
+      ],
+      "size": [
+        0.017499999999999998,
+        0.025,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        -1.5,
+        0.0075,
+        9.5
+      ],
+      "size": [
+        0.0125,
+        0.005,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        -1.5,
+        5.9825,
+        9.5
+      ],
+      "size": [
+        0.017499999999999998,
+        0.025,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        0.0,
+        0.0075,
+        9.5
+      ],
+      "size": [
+        0.0125,
+        0.005,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        0.0,
+        5.9825,
+        9.5
+      ],
+      "size": [
+        0.017499999999999998,
+        0.025,
+        6.5
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        1.5,
+        0.0075,
+        -0.5
+      ],
+      "size": [
+        0.0125,
+        0.005,
+        26.5
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        1.5,
+        5.9825,
+        -0.5
+      ],
+      "size": [
+        0.017499999999999998,
+        0.025,
+        26.5
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        3.0,
+        0.0075,
+        -0.5
+      ],
+      "size": [
+        0.0125,
+        0.005,
+        26.5
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        3.0,
+        5.9825,
+        -0.5
+      ],
+      "size": [
+        0.017499999999999998,
+        0.025,
+        26.5
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        4.5,
+        0.0075,
+        -0.5
+      ],
+      "size": [
+        0.0125,
+        0.005,
+        26.5
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        4.5,
+        5.9825,
+        -0.5
+      ],
+      "size": [
+        0.017499999999999998,
+        0.025,
+        26.5
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        6.0,
+        0.0075,
+        -0.5
+      ],
+      "size": [
+        0.0125,
+        0.005,
+        26.5
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        6.0,
+        5.9825,
+        -0.5
+      ],
+      "size": [
+        0.017499999999999998,
+        0.025,
+        26.5
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        7.5,
+        0.0075,
+        -0.5
+      ],
+      "size": [
+        0.0125,
+        0.005,
+        26.5
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        7.5,
+        5.9825,
+        -0.5
+      ],
+      "size": [
+        0.017499999999999998,
+        0.025,
+        26.5
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Floor tile joint",
+      "position": [
+        9.0,
+        0.0075,
+        -0.5
+      ],
+      "size": [
+        0.0125,
+        0.005,
+        26.5
+      ],
+      "rotation": 0,
+      "material": "grout"
+    },
+    {
+      "name": "Ceiling seam",
+      "position": [
+        9.0,
+        5.9825,
+        -0.5
+      ],
+      "size": [
+        0.017499999999999998,
+        0.025,
+        26.5
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Ceiling light surround",
+      "position": [
+        -5.0,
+        5.930000000000001,
+        10.0
+      ],
+      "size": [
+        1.7,
+        0.06,
+        0.8
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Ceiling light",
+      "position": [
+        -5.0,
+        5.885000000000001,
+        10.0
+      ],
+      "size": [
+        1.6,
+        0.05,
+        0.7
+      ],
+      "rotation": 0,
+      "material": "light"
+    },
+    {
+      "name": "Ceiling light surround",
+      "position": [
+        0.0,
+        5.930000000000001,
+        10.0
+      ],
+      "size": [
+        1.7,
+        0.06,
+        0.8
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Ceiling light",
+      "position": [
+        0.0,
+        5.885000000000001,
+        10.0
+      ],
+      "size": [
+        1.6,
+        0.05,
+        0.7
+      ],
+      "rotation": 0,
+      "material": "light"
+    },
+    {
+      "name": "Ceiling light surround",
+      "position": [
+        4.5,
+        5.930000000000001,
+        10.0
+      ],
+      "size": [
+        1.7,
+        0.06,
+        0.8
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Ceiling light",
+      "position": [
+        4.5,
+        5.885000000000001,
+        10.0
+      ],
+      "size": [
+        1.6,
+        0.05,
+        0.7
+      ],
+      "rotation": 0,
+      "material": "light"
+    },
+    {
+      "name": "Ceiling light surround",
+      "position": [
+        4.5,
+        5.930000000000001,
+        4.0
+      ],
+      "size": [
+        1.7,
+        0.06,
+        0.8
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Ceiling light",
+      "position": [
+        4.5,
+        5.885000000000001,
+        4.0
+      ],
+      "size": [
+        1.6,
+        0.05,
+        0.7
+      ],
+      "rotation": 0,
+      "material": "light"
+    },
+    {
+      "name": "Ceiling light surround",
+      "position": [
+        4.5,
+        5.930000000000001,
+        -2.0
+      ],
+      "size": [
+        1.7,
+        0.06,
+        0.8
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Ceiling light",
+      "position": [
+        4.5,
+        5.885000000000001,
+        -2.0
+      ],
+      "size": [
+        1.6,
+        0.05,
+        0.7
+      ],
+      "rotation": 0,
+      "material": "light"
+    },
+    {
+      "name": "Ceiling light surround",
+      "position": [
+        4.5,
+        5.930000000000001,
+        -8.0
+      ],
+      "size": [
+        1.7,
+        0.06,
+        0.8
+      ],
+      "rotation": 0,
+      "material": "ceiling_grid"
+    },
+    {
+      "name": "Ceiling light",
+      "position": [
+        4.5,
+        5.885000000000001,
+        -8.0
+      ],
+      "size": [
+        1.6,
+        0.05,
+        0.7
+      ],
+      "rotation": 0,
+      "material": "light"
+    },
+    {
+      "name": "Consultation door frame",
+      "position": [
+        9.299999999999997,
+        2.35,
+        4.25
+      ],
+      "size": [
+        0.25,
+        4.7,
+        2.7
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Consultation door",
+      "position": [
+        9.100000000000001,
+        2.2,
+        4.25
+      ],
+      "size": [
+        0.15,
+        4.4,
+        2.3
+      ],
+      "rotation": 0,
+      "material": "wood"
+    },
+    {
+      "name": "Consultation window",
+      "position": [
+        9.0,
+        3.05,
+        4.25
+      ],
+      "size": [
+        0.05,
+        1.5,
+        1.0
+      ],
+      "rotation": 0,
+      "material": "glass"
+    },
+    {
+      "name": "Consultation handle",
+      "position": [
+        8.899999999999999,
+        2.175,
+        3.4499999999999993
+      ],
+      "size": [
+        0.1,
+        0.55,
+        0.15
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Consultation kick plate",
+      "position": [
+        9.0,
+        0.445,
+        4.25
+      ],
+      "size": [
+        0.04,
+        0.65,
+        2.1
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Consultation sanitizer",
+      "position": [
+        9.149999999999999,
+        2.35,
+        2.4499999999999993
+      ],
+      "size": [
         0.35,
-        0.045
+        0.5,
+        0.4
       ],
       "rotation": 0,
       "material": "sign"
+    },
+    {
+      "name": "Consultation sanitizer window",
+      "position": [
+        8.950000000000003,
+        2.35,
+        2.4499999999999993
+      ],
+      "size": [
+        0.025,
+        0.2,
+        0.2
+      ],
+      "rotation": 0,
+      "material": "glass"
+    },
+    {
+      "name": "Consultation sanitizer lever",
+      "position": [
+        8.899999999999999,
+        2.14,
+        2.4499999999999993
+      ],
+      "size": [
+        0.1,
+        0.08,
+        0.3
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Pharmacy door frame",
+      "position": [
+        9.299999999999997,
+        2.35,
+        0.0
+      ],
+      "size": [
+        0.25,
+        4.7,
+        2.7
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Pharmacy door",
+      "position": [
+        9.100000000000001,
+        2.2,
+        0.0
+      ],
+      "size": [
+        0.15,
+        4.4,
+        2.3
+      ],
+      "rotation": 0,
+      "material": "wood"
+    },
+    {
+      "name": "Pharmacy window",
+      "position": [
+        9.0,
+        3.05,
+        0.0
+      ],
+      "size": [
+        0.05,
+        1.5,
+        1.0
+      ],
+      "rotation": 0,
+      "material": "glass"
+    },
+    {
+      "name": "Pharmacy handle",
+      "position": [
+        8.899999999999999,
+        2.175,
+        -0.8000000000000007
+      ],
+      "size": [
+        0.1,
+        0.55,
+        0.15
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Pharmacy kick plate",
+      "position": [
+        9.0,
+        0.445,
+        0.0
+      ],
+      "size": [
+        0.04,
+        0.65,
+        2.1
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Pharmacy sanitizer",
+      "position": [
+        9.149999999999999,
+        2.35,
+        -1.8000000000000007
+      ],
+      "size": [
+        0.35,
+        0.5,
+        0.4
+      ],
+      "rotation": 0,
+      "material": "sign"
+    },
+    {
+      "name": "Pharmacy sanitizer window",
+      "position": [
+        8.950000000000003,
+        2.35,
+        -1.8000000000000007
+      ],
+      "size": [
+        0.025,
+        0.2,
+        0.2
+      ],
+      "rotation": 0,
+      "material": "glass"
+    },
+    {
+      "name": "Pharmacy sanitizer lever",
+      "position": [
+        8.899999999999999,
+        2.14,
+        -1.8000000000000007
+      ],
+      "size": [
+        0.1,
+        0.08,
+        0.3
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Imaging door frame",
+      "position": [
+        9.299999999999997,
+        2.35,
+        -8.25
+      ],
+      "size": [
+        0.25,
+        4.7,
+        2.7
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Imaging door",
+      "position": [
+        9.100000000000001,
+        2.2,
+        -8.25
+      ],
+      "size": [
+        0.15,
+        4.4,
+        2.3
+      ],
+      "rotation": 0,
+      "material": "wood"
+    },
+    {
+      "name": "Imaging window",
+      "position": [
+        9.0,
+        3.05,
+        -8.25
+      ],
+      "size": [
+        0.05,
+        1.5,
+        1.0
+      ],
+      "rotation": 0,
+      "material": "glass"
+    },
+    {
+      "name": "Imaging handle",
+      "position": [
+        8.899999999999999,
+        2.175,
+        -9.05
+      ],
+      "size": [
+        0.1,
+        0.55,
+        0.15
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Imaging kick plate",
+      "position": [
+        9.0,
+        0.445,
+        -8.25
+      ],
+      "size": [
+        0.04,
+        0.65,
+        2.1
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Imaging sanitizer",
+      "position": [
+        9.149999999999999,
+        2.35,
+        -10.05
+      ],
+      "size": [
+        0.35,
+        0.5,
+        0.4
+      ],
+      "rotation": 0,
+      "material": "sign"
+    },
+    {
+      "name": "Imaging sanitizer window",
+      "position": [
+        8.950000000000003,
+        2.35,
+        -10.05
+      ],
+      "size": [
+        0.025,
+        0.2,
+        0.2
+      ],
+      "rotation": 0,
+      "material": "glass"
+    },
+    {
+      "name": "Imaging sanitizer lever",
+      "position": [
+        8.899999999999999,
+        2.14,
+        -10.05
+      ],
+      "size": [
+        0.1,
+        0.08,
+        0.3
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Waiting chair seat",
+      "position": [
+        -3.5,
+        0.975,
+        11.899999999999999
+      ],
+      "size": [
+        1.1,
+        0.25,
+        1.0
+      ],
+      "rotation": 0,
+      "material": "seat"
+    },
+    {
+      "name": "Waiting chair back",
+      "position": [
+        -3.5,
+        1.5750000000000002,
+        12.45
+      ],
+      "size": [
+        1.1,
+        1.35,
+        0.15
+      ],
+      "rotation": 0,
+      "material": "seat"
+    },
+    {
+      "name": "Waiting chair leg",
+      "position": [
+        -3.8999999999999986,
+        0.425,
+        11.899999999999999
+      ],
+      "size": [
+        0.1,
+        0.85,
+        0.8
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Waiting chair leg",
+      "position": [
+        -3.1000000000000014,
+        0.425,
+        11.899999999999999
+      ],
+      "size": [
+        0.1,
+        0.85,
+        0.8
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Waiting chair seat",
+      "position": [
+        -2.0,
+        0.975,
+        11.899999999999999
+      ],
+      "size": [
+        1.1,
+        0.25,
+        1.0
+      ],
+      "rotation": 0,
+      "material": "seat"
+    },
+    {
+      "name": "Waiting chair back",
+      "position": [
+        -2.0,
+        1.5750000000000002,
+        12.45
+      ],
+      "size": [
+        1.1,
+        1.35,
+        0.15
+      ],
+      "rotation": 0,
+      "material": "seat"
+    },
+    {
+      "name": "Waiting chair leg",
+      "position": [
+        -2.3999999999999986,
+        0.425,
+        11.899999999999999
+      ],
+      "size": [
+        0.1,
+        0.85,
+        0.8
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Waiting chair leg",
+      "position": [
+        -1.6000000000000014,
+        0.425,
+        11.899999999999999
+      ],
+      "size": [
+        0.1,
+        0.85,
+        0.8
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Waiting chair seat",
+      "position": [
+        -0.5,
+        0.975,
+        11.899999999999999
+      ],
+      "size": [
+        1.1,
+        0.25,
+        1.0
+      ],
+      "rotation": 0,
+      "material": "seat"
+    },
+    {
+      "name": "Waiting chair back",
+      "position": [
+        -0.5,
+        1.5750000000000002,
+        12.45
+      ],
+      "size": [
+        1.1,
+        1.35,
+        0.15
+      ],
+      "rotation": 0,
+      "material": "seat"
+    },
+    {
+      "name": "Waiting chair leg",
+      "position": [
+        -0.8999999999999986,
+        0.425,
+        11.899999999999999
+      ],
+      "size": [
+        0.1,
+        0.85,
+        0.8
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Waiting chair leg",
+      "position": [
+        -0.10000000000000142,
+        0.425,
+        11.899999999999999
+      ],
+      "size": [
+        0.1,
+        0.85,
+        0.8
+      ],
+      "rotation": 0,
+      "material": "metal"
+    },
+    {
+      "name": "Reception desk",
+      "position": [
+        -6.899999999999999,
+        1.0,
+        7.0
+      ],
+      "size": [
+        2.4,
+        2,
+        1.05
+      ],
+      "rotation": 0,
+      "material": "wood"
+    },
+    {
+      "name": "Reception counter",
+      "position": [
+        -6.899999999999999,
+        2.075,
+        7.0
+      ],
+      "size": [
+        2.5,
+        0.15,
+        1.2
+      ],
+      "rotation": 0,
+      "material": "sign"
+    },
+    {
+      "name": "Welcome plaque backing",
+      "position": [
+        -5.5,
+        3.4,
+        9.032499999999999
+      ],
+      "size": [
+        1.8399999999999999,
+        0.49,
+        0.034999999999999996
+      ],
+      "rotation": 0,
+      "material": "plaque"
+    },
+    {
+      "name": "Lobby plaque backing",
+      "position": [
+        5.467500000000001,
+        3.8,
+        10.0
+      ],
+      "size": [
+        0.034999999999999996,
+        0.49,
+        1.8399999999999999
+      ],
+      "rotation": 0,
+      "material": "plaque"
+    },
+    {
+      "name": "Pharmacy plaque backing",
+      "position": [
+        6.5,
+        3.8,
+        -0.9675000000000011
+      ],
+      "size": [
+        1.8399999999999999,
+        0.49,
+        0.034999999999999996
+      ],
+      "rotation": 0,
+      "material": "plaque"
+    },
+    {
+      "name": "X-ray plaque backing",
+      "position": [
+        6.5,
+        3.8,
+        -10.9675
+      ],
+      "size": [
+        1.8399999999999999,
+        0.49,
+        0.034999999999999996
+      ],
+      "rotation": 0,
+      "material": "plaque"
+    },
+    {
+      "name": "101 plaque backing",
+      "position": [
+        9.317499999999995,
+        3.6,
+        6.050000000000001
+      ],
+      "size": [
+        0.034999999999999996,
+        0.24000000000000002,
+        0.8400000000000001
+      ],
+      "rotation": 0,
+      "material": "plaque"
+    },
+    {
+      "name": "102 plaque backing",
+      "position": [
+        9.317499999999995,
+        3.6,
+        1.8000000000000007
+      ],
+      "size": [
+        0.034999999999999996,
+        0.24000000000000002,
+        0.8400000000000001
+      ],
+      "rotation": 0,
+      "material": "plaque"
+    },
+    {
+      "name": "103 plaque backing",
+      "position": [
+        9.317499999999995,
+        3.6,
+        -6.449999999999999
+      ],
+      "size": [
+        0.034999999999999996,
+        0.24000000000000002,
+        0.8400000000000001
+      ],
+      "rotation": 0,
+      "material": "plaque"
     }
   ],
   "walls": [
@@ -367,6 +2433,42 @@
       105,
       960,
       65
+    ],
+    [
+      680,
+      580,
+      1040,
+      580
+    ],
+    [
+      1040,
+      580,
+      1040,
+      50
+    ],
+    [
+      1040,
+      50,
+      880,
+      50
+    ],
+    [
+      880,
+      50,
+      880,
+      450
+    ],
+    [
+      880,
+      450,
+      680,
+      450
+    ],
+    [
+      680,
+      450,
+      680,
+      580
     ]
   ],
   "pillars": [
@@ -496,5 +2598,71 @@
       0
     ],
     "distance": 52
-  }
+  },
+  "interior": true,
+  "signs": [
+    {
+      "text": "Welcome",
+      "detail": "Reception / Outpatient care",
+      "x": 740,
+      "y": 506,
+      "height": 3.4,
+      "rotation": 0,
+      "width": 1.8
+    },
+    {
+      "text": "Lobby",
+      "detail": "\u2190 Pharmacy / X-ray",
+      "x": 959,
+      "y": 525,
+      "height": 3.8,
+      "rotation": -1.5707963267948966,
+      "width": 1.8
+    },
+    {
+      "text": "Pharmacy",
+      "detail": "02 / Prescriptions",
+      "x": 980,
+      "y": 306,
+      "height": 3.8,
+      "rotation": 0,
+      "width": 1.8
+    },
+    {
+      "text": "X-ray",
+      "detail": "03 / Diagnostic imaging",
+      "x": 980,
+      "y": 106,
+      "height": 3.8,
+      "rotation": 0,
+      "width": 1.8
+    },
+    {
+      "text": "101",
+      "detail": "Outpatient",
+      "x": 1036,
+      "y": 446,
+      "height": 3.6,
+      "rotation": -1.5707963267948966,
+      "width": 0.8
+    },
+    {
+      "text": "102",
+      "detail": "Outpatient",
+      "x": 1036,
+      "y": 361,
+      "height": 3.6,
+      "rotation": -1.5707963267948966,
+      "width": 0.8
+    },
+    {
+      "text": "103",
+      "detail": "Outpatient",
+      "x": 1036,
+      "y": 196,
+      "height": 3.6,
+      "rotation": -1.5707963267948966,
+      "width": 0.8
+    }
+  ]
 }

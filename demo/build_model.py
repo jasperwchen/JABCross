@@ -2,6 +2,7 @@ import argparse,json,struct,pathlib,math
 p=pathlib.Path(__file__).parent
 parser=argparse.ArgumentParser(description='Build the shared café demo map; --hospital restores the Grady reference.')
 parser.add_argument('--hospital',action='store_true')
+parser.add_argument('--interior',action='store_true',help='Add the scripted hospital set to the café viewer only')
 parser.add_argument('--output-dir',type=pathlib.Path,default=p)
 args=parser.parse_args()
 args.output_dir.mkdir(parents=True,exist_ok=True)
@@ -27,6 +28,9 @@ data['edges']=[[a,b,max(1,round(w*STEPS_PER_UNIT))] for a,b,w in data['edges']]
 if not args.hospital:
  from cafe_geometry import build_cafe
  data=build_cafe()
+ if args.interior:
+  from hospital_interior import add_interior
+  add_interior(data)
  rooms,walls,objects,facilities,PALETTE=(data[k] for k in ['rooms','walls','objects','facilities','palette'])
 (args.output_dir/'grady-ground.json').write_text(json.dumps(data,indent=2),encoding='utf8')
 # Portable GLB: reusable cube mesh instanced for each wall and floor.
