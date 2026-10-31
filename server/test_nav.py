@@ -281,6 +281,12 @@ class Guidance(NavTest):
         self.update(frame(marker(1)))
         self.assertEqual(self.nav.state()["node"], "lobby")
 
+    def test_far_marker_sets_position_without_route(self):
+        self.update(frame(marker(3, distance=1.0)))
+        self.update(frame(marker(0, distance=2.5)))
+        self.assertEqual(self.nav.state()["node"], self.nav.by_marker[0])
+        self.assertTrue(self.nav.command("x-ray").startswith("Going to X-ray"))
+
     def test_quiet_before_any_route(self):
         self.assertEqual(self.frames(10, frame(marker(1, 3.0), center=0.5, view_ok=False)), [QUIET] * 40)
 

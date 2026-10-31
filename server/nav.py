@@ -136,7 +136,8 @@ class Navigator:
             self.offset = self.nodes[node]["facing"] - nearest["bearing_deg"] - heading
         if self.next_in_view and self.deadline is not None:
             self.deadline = max(self.deadline, self.clock() + SIGHTED_S)
-        if nearest["distance_m"] >= ARRIVE_M or node == self.node:
+        # With no route, any sighting is the best position guess (e.g. standing 1.5 m from the entrance sign).
+        if node == self.node or (self.route and nearest["distance_m"] >= ARRIVE_M):
             return None
         self.node = node
         if not self.route:
