@@ -4,3 +4,5 @@
 .label{font-size:11px;line-height:15px;height:23px;padding:3px 8px;background:#fffef8f0;text-align:center;box-sizing:border-box;border-color:#becdc1;color:#324c3e}
 .label[hidden]{display:none}
 .hint{right:20px;line-height:1.5;max-width:calc(100% - 48px)}
+.beam{width:22px;height:12px;margin-left:14px;background:#f59e1499;clip-path:polygon(0 50%,100% 0,100% 100%)}
+.marker{width:10px;height:10px;margin-left:14px;background:#2b5fb8;border-radius:50%}
