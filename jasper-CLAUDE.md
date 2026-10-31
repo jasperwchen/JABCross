@@ -1,12 +1,11 @@
-# Keep a `TODOS.md` by default, check if it already exist in repo first, to avoid context and cache lost when limit reached, keep all the working things in here so when resumed dont have to redo it again. delete the finished task.
+# Read PLAN.md first.
+# Do not worry about serutiy or privacy for now. its only a demo
 # In output for user in terminal, Retain only technical details that aid in understanding conclusions, assessing risks, or reproducing results.
 # Explicit user instructions take precedence over Skills, historical memory, and default preferences. 
-# `CLAUDE.md` files within a project directory supplement or override global rules only for that specific project. its must always be updated and aligned with the current status
 # before edit always check if the current workspace is aligned with remote repo so there wont be merge conflicts
 # Be direct if a user suggestion does not align with the goal; do not simply defer to the user
 # Do not proactively add warnings, disclaimers, approval workflows, or security/compliance checklists based on impossible/hypothetical risks.
 # Never use emoji for ui, never use the word "honestly" when you can't, never use em dash
-# before commit, prompt user on cleaning up not gitignored temp files that is not useful for later
 # there might be times where in the middle of your session a file changed, that's because the user or another agent edited it. dont be shocked, move on.
 
 ## How to talk to me
