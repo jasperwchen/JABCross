@@ -13,8 +13,7 @@ from ultralytics import YOLO
 from ultralytics.utils.plotting import colorize_depth
 
 DEVICE = "mps" if torch.backends.mps.is_available() else 0 if torch.cuda.is_available() else "cpu"
-MODEL = YOLO("yolo26n-depth.pt")  # downloads on first use; s/m/l/x sizes are slower and more accurate
-IMGSZ = 640
+MODEL = YOLO("yolo26n-depth.pt")  # downloads on first use; predicts at its trained 768 px. s/m/l/x: slower, more accurate
 
 BLOCKED_M = 0.3  # view_ok is false when most of the frame is closer than this (lens covered)
 BLOCKED_FRACTION = 0.8
@@ -34,7 +33,7 @@ def perceive(jpeg_bytes):
     frame = cv2.imdecode(np.frombuffer(jpeg_bytes, np.uint8), cv2.IMREAD_COLOR)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    result = MODEL.predict(frame, imgsz=IMGSZ, device=DEVICE, verbose=False)[0]
+    result = MODEL.predict(frame, device=DEVICE, verbose=False)[0]
     depth = result.depth.data.cpu().numpy()  # (H, W) meters, same size as the frame
 
     thirds = np.array_split(depth, 3, axis=1)
