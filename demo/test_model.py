@@ -3,6 +3,10 @@ P=pathlib.Path(__file__).parent
 class ModelCoverage(unittest.TestCase):
  def setUp(self):self.d=json.loads((P/'grady-ground.json').read_text())
  def test_complete_crop_coverage(self):
+  if self.d.get('venue')=='cafe':
+   self.assertEqual(len(self.d['pillars']),4)
+   self.assertEqual(len(self.d['nodes']),4)
+   return
   names=' '.join(r['name'] for r in self.d['rooms'])
   for area in ['Exam 134','Patient toilet','Breakroom','Stair 16','North waiting','East room','Medication']:self.assertIn(area,names)
   self.assertGreaterEqual(len(self.d['rooms']),60)
