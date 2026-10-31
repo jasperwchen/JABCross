@@ -29,7 +29,10 @@ def frame(image: UploadFile, heading: float = Form()):
     jpeg = image.file.read()
     with lock:
         t = time.perf_counter()
-        out = navigator.update(perceive(jpeg), heading)
+        seen = perceive(jpeg)
+        for m in seen["markers"]:  # phone-camera readings, for the FOV_LONG_DEG calibration in perception.py
+            print(f"marker {m['id']}: {m['distance_m']} m at {m['bearing_deg']} deg", flush=True)
+        out = navigator.update(seen, heading)
         busy_s += time.perf_counter() - t
         frames += 1
         if frames == 20:
