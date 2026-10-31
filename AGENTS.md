@@ -1,8 +1,8 @@
-# JabCross agent context
+# AcuPath agent context
 
 ## Goal and pace
 
-JabCross is a five-hour, three-person hackathon project: "Google Maps for hospitals,"
+AcuPath is a six-hour, three-person hackathon project: "Google Maps for hospitals,"
 starting with blind and low-vision patients. A phone worn on the chest sends camera
 frames and heading to a laptop. The laptop detects obstacles and printed location
 markers, calculates a route, and returns spoken directions. After one start tap,
@@ -17,8 +17,8 @@ where practical; the phone page stays plain HTML/JavaScript.
 
 ## Read first and check the latest version
 
-1. Read `PLAN.md`: current owners, shared contracts, checklists, and timeline.
-2. Read `IDEATE.md` for the agreed pitch and scope, and `PROMPT.md` for judging.
+1. Read `docs/PLAN.md`: current owners, shared contracts, checklists, and timeline.
+2. Read `docs/IDEA.md` for the agreed pitch and scope, and `docs/HG-PROMPT.md` for judging.
 3. Read the handoff or README for the area you are changing. For the phone, use
    `docs/handoff_C_phone.md`; for the viewer, use `demo/README.md`.
 4. Check `git status`, the branch, and recent commits before editing. Fetch the
@@ -34,7 +34,7 @@ where practical; the phone page stays plain HTML/JavaScript.
    choice in the existing dependency file or relevant README. Do not install
    packages unless needed.
 
-`PLAN.md` is the source of truth for shared interfaces if another project document
+`docs/PLAN.md` is the source of truth for shared interfaces if another project document
 disagrees. Files describe both plans and implemented work: inspect the current code
 and test results before claiming something works. Keep this file aligned when the
 architecture changes. `CLAUDE.md` points here to avoid two competing sets of rules.
@@ -50,17 +50,17 @@ architecture changes. `CLAUDE.md` points here to avoid two competing sets of rul
 Respect the assigned area. Coordinate changes to another owner's files or any
 shared endpoint/data shape with the user before implementing them.
 
-- `PLAN.md` contains the active per-person checklists; use those as milestones.
+- `docs/PLAN.md` contains the active per-person checklists; use those as milestones.
 - `demo/` contains a working standalone Three.js viewer and simulated route, with
   vendored dependencies. `demo/build_model.py` generates `grady-ground.json` and
   `grady-ground.glb`. Edit the generator, not generated map data by hand.
 - `markers/markers.pdf` contains ArUco IDs 0–11, dictionary `DICT_4X4_50`. Print at
   actual size; the black square must measure 0.15 m. `markers/make_markers.py`
   regenerates it using OpenCV and Pillow.
-- `GRADY-HOSPITAL-BASE-PLANS-02.17.22.pdf` is the source floor plan. The viewer uses
+- `floor-plan/GRADY-HOSPITAL-BASE-PLANS-02.17.22.pdf` is the source floor plan. The viewer uses
   the entrance/lab crop of ground-floor GMH-G, PDF page 3.
-- `docs/superpowers/plans/2026-10-31-grady-viewer.md` is the earlier viewer plan.
-  `GOOGLEMAPS.md` is brainstorming; `jasper-CLAUDE.md` contains teammate guidance.
+- `docs/plans/grady-viewer.md` is the earlier viewer plan.
+  `docs/brainstorm.md` is brainstorming.
   Consult these for background without overriding the current shared build plan.
 - `web/` may contain in-progress local work. Inspect it without overwriting it.
   The phone mock server is independent of the planned real server.
@@ -68,7 +68,7 @@ shared endpoint/data shape with the user before implementing them.
   YOLO26 depth and ArUco markers), a webcam check of perception (`live_depth.py`), the
   navigator (`nav.py`), and dependencies in `requirements.txt`. Mac speed and distance
   accuracy still need checking on the laptop; do not assume live viewer integration
-  exists merely because it appears in `PLAN.md`.
+  exists merely because it appears in `docs/PLAN.md`.
 
 No accounts, scheduling, reviews, caregiver requests, or additional disability
 features are in scope. Jev markerless localization is optional, only after the

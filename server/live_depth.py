@@ -38,7 +38,7 @@ while True:
 
     cv2.putText(frame, status[:60], (10, frame.shape[0] - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
     depth = cv2.imdecode(np.frombuffer(perception.latest_depth_jpg(), np.uint8), cv2.IMREAD_COLOR)
-    cv2.imshow("JabCross perception (q to quit)", np.hstack([frame, depth]))
+    cv2.imshow("AcuPath perception (q to quit)", np.hstack([frame, depth]))
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 cap.release()

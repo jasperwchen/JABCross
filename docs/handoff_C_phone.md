@@ -1,8 +1,8 @@
 # Handoff: Person C (Ayan) - phone page
 
-You are building Ayan's part of JabCross, a 5-hour hackathon project. Start immediately; the
+You are building Ayan's part of AcuPath, a 5-hour hackathon project. Start immediately; the
 team is already building. Read `PLAN.md` (the build plan and the contract between the three
-pieces) and `IDEATE.md` (the pitch) first. If this doc and `PLAN.md` disagree, `PLAN.md` wins.
+pieces) and `IDEA.md` (the pitch) first. If this doc and `PLAN.md` disagree, `PLAN.md` wins.
 
 ## The product in one paragraph
 

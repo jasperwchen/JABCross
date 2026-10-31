@@ -1,4 +1,4 @@
-"""Perception: one phone JPEG in, obstacles + view check + ArUco markers out (contract in PLAN.md).
+"""Perception: one phone JPEG in, obstacles + view check + ArUco markers out (contract in docs/PLAN.md).
 
 Depth comes from the Ultralytics YOLO26 depth model. Live check on the laptop webcam: python server/live_depth.py
 """

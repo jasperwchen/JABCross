@@ -1,4 +1,4 @@
-"""JabCross laptop server: phone frames in, spoken guidance out.
+"""AcuPath laptop server: phone frames in, spoken guidance out.
 
 Run:  .venv/bin/python server/app.py      (http://localhost:8000, any cwd)
 Then: cloudflared tunnel --url http://localhost:8000   (open the https URL on the phone)

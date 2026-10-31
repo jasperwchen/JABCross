@@ -1,6 +1,6 @@
-# JabCross: Google Maps for hospitals
+# AcuPath: Google Maps for hospitals
 
-## Prompt (see PROMPT.md)
+## Prompt (see HG-PROMPT.md)
 
 Accessibility tools for navigating the medical care system for disabled users.
 Judged on: practicality/relevance, creativity/innovation, significance, technical complexity.
@@ -26,7 +26,7 @@ Decided:
 - One core feature: hospital navigation for blind patients
 - Voice-only operation is the one extension in scope
 - No BetterBell code; accounts are hardcoded
-- Map source: Grady Memorial Hospital base plans (GRADY-HOSPITAL-BASE-PLANS-02.17.22.pdf).
+- Map source: Grady Memorial Hospital base plans (floor-plan/GRADY-HOSPITAL-BASE-PLANS-02.17.22.pdf).
   If tracing it takes too long, use a mock floor plan; this is a proof of concept.
 - Security is out of scope
 

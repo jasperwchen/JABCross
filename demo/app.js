@@ -13,7 +13,7 @@ for(const link of document.querySelectorAll('footer a[download]'))link.href=mapB
 $('#start-name').textContent=data.nodes.entrance.name+' · Marker 0';
 $('#venue').textContent=cafe?'Hospital route demo':'Grady Memorial Hospital';
 $('#map-heading').textContent=cafe?'Hospital route demo':'Grady Memorial Hospital';
-document.title=cafe?'JabCross · Hospital route demo':'JabCross · Grady Memorial Hospital';
+document.title=cafe?'AcuPath · Hospital route demo':'AcuPath · Grady Memorial Hospital';
 $('#destination').replaceChildren(...data.destinations.map(id=>{const option=document.createElement('option');option.value=id;option.textContent=data.nodes[id].name;return option}));
 if(cafe)$('#destination').value='xray';
 if(!cafe){for(const option of $('#pace').options)option.textContent=option.textContent.split(' · ')[0];$('#map-description').textContent='Plan a route through the entrance and outpatient area, then preview the walk.';$('#scope').textContent='Ground floor · GMH-G';$('#map-scope').textContent='Entrance / outpatient area';$('#route-note').textContent='Based on the Grady floor plan. Routes and distances are illustrative and have not been validated for patient use.'}
@@ -117,7 +117,7 @@ function updateLabels(){
  const width=host.clientWidth,height=host.clientHeight,hostRect=host.getBoundingClientRect();
  occupied.length=0;
  // Reserve screen chrome so labels never obscure view controls or the legend.
- for(const selector of ['.tools','.maptitle','.legend','.hint']){const r=$(selector).getBoundingClientRect();occupied.push({left:r.left-hostRect.left-6,right:r.right-hostRect.left+6,top:r.top-hostRect.top-6,bottom:r.bottom-hostRect.top+6})}
+ for(const selector of ['.tools','.maptitle','.legend','.hint','.instruction']){const r=$(selector).getBoundingClientRect();occupied.push({left:r.left-hostRect.left-6,right:r.right-hostRect.left+6,top:r.top-hostRect.top-6,bottom:r.bottom-hostRect.top+6})}
  const selected=$('#destination').value;
  const ordered=[...labels].sort((a,b)=>(a.id===selected?-2:a.id==='entrance'?-1:a.priority)-(b.id===selected?-2:b.id==='entrance'?-1:b.priority));
  for(const label of ordered){
@@ -173,7 +173,7 @@ const legHeading=i=>Math.atan2(path[i+1].x-path[i].x,-(path[i+1].z-path[i].z));
 function shortest(target){const distances={entrance:0},previous={},todo=new Set(Object.keys(data.nodes));while(todo.size){let u=[...todo].reduce((a,b)=>(distances[a]??Infinity)<(distances[b]??Infinity)?a:b);todo.delete(u);if(u===target)break;for(const [a,b,w] of data.edges){let v=a===u?b:b===u?a:null;if(v&&todo.has(v)&&(distances[u]??Infinity)+w<(distances[v]??Infinity)){distances[v]=distances[u]+w;previous[v]=u}}}const result=[target];while(result[0]!=='entrance'){const n=previous[result[0]];if(!n)throw Error('Destination is unreachable');result.unshift(n)}return result}
 function say(text){$('#guidance').textContent=text;if($('#voice').checked&&'speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(text))}}
 function instruction(i,fromHeading){const error=Math.atan2(Math.sin(legHeading(i)-fromHeading),Math.cos(legHeading(i)-fromHeading))*180/Math.PI;const edge=data.edges.find(([a,b])=>a===routeIds[i]&&b===routeIds[i+1]||b===routeIds[i]&&a===routeIds[i+1]);return `${Math.abs(error)>15?`Turn ${error>0?'right':'left'} about ${Math.round(Math.abs(error)/5)*5} degrees. `:''}Walk forward about ${edge[2]} steps.`}
-function reset(){countdown=0;walkTime=0;$('#timer').textContent='00:00';playing=false;offRoute=false;segment=0;fraction=0;elapsed=0;$('#play').textContent='Start scripted walk';$('#progress').value=0;dot.position.copy(path[0]);heading=targetHeading=THREE.MathUtils.degToRad(data.nodes.entrance.facing);if('speechSynthesis'in window)speechSynthesis.cancel();say('Ready at the entrance. Facing marker 0.')}
+function reset(){countdown=0;walkTime=0;$('#timer').textContent='00:00';playing=false;offRoute=false;segment=0;fraction=0;elapsed=0;$('#play').textContent='Start walk';$('#progress').value=0;dot.position.copy(path[0]);heading=targetHeading=THREE.MathUtils.degToRad(data.nodes.entrance.facing);if('speechSynthesis'in window)speechSynthesis.cancel();say('Ready at the entrance.')}
 function choose(){if(route){scene.remove(route);route.geometry.dispose();route.material.dispose()}routeIds=shortest($('#destination').value);path=routeIds.map(id=>{const n=data.nodes[id];return xyz(n.x,n.y,.65)});total=path.slice(1).reduce((s,p,i)=>s+p.distanceTo(path[i]),0);route=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshBasicMaterial());route.geometry.dispose();const curve=new THREE.CurvePath();for(let i=1;i<path.length;i++)curve.add(new THREE.LineCurve3(path[i-1],path[i]));route.geometry=new THREE.TubeGeometry(curve,Math.ceil(total*3),.13,8,false);route.material.color.set(0x14856c);scene.add(route);route.visible=viewMode!=='pov';$('#target').textContent=data.nodes[$('#destination').value].name;reset()}
 $('#destination').onchange=choose;$('#reset').onclick=reset;
 $('#play').onclick=()=>{
@@ -199,7 +199,7 @@ function view(mode){
  for(const ceiling of ceilings)ceiling.visible=pov;
  if(route)route.visible=!pov;
  for(const name of ['pov','top','angled'])$('#'+name).setAttribute('aria-pressed',name===mode);
- $('.hint').textContent=pov?'Eye-level view · Camera follows the scripted route':'Drag to rotate · Scroll to zoom · Right-drag to pan';
+ $('.hint').textContent=pov?'Eye-level view':'Drag to rotate · Scroll to zoom · Right-drag to pan';
  if(pov){followWalker();return}
  const distance=data.view?.distance??100;
  camera.position.set(...(mode==='top'?[0,distance,.01]:[distance*.3,distance*.73,distance*.64]));

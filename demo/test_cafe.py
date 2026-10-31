@@ -59,15 +59,15 @@ class CafeDemo(unittest.TestCase):
         self.update(0, 0)
         self.assertIn('Turn right about 90 degrees.', self.nav.command('take me to x ray'))
         self.assertEqual(self.update(90), 'Walk forward about 7 steps.')
-        self.assertEqual(self.update(90, 1), 'Turn left about 90 degrees.')
+        self.assertEqual(self.update(90, 1), 'Lobby. Turn left about 90 degrees.')
         self.assertEqual(self.update(0), 'Walk forward about 7 steps.')
-        self.assertEqual(self.update(0, 2), 'Walk forward about 7 steps.')
+        self.assertEqual(self.update(0, 2), 'Pharmacy. Walk forward about 7 steps.')
         self.assertEqual(self.update(0, 3), 'You have arrived at X-ray.')
         self.assertEqual(self.nav.state(), dict(node='xray', marker=3, destination=None))
 
     def test_pharmacy_arrival_and_aliases(self):
         for alias in ['pharmacy', 'medicine', 'prescription']:
-            self.assertIn('Starting route to Pharmacy.', self.nav.command(alias))
+            self.assertIn('Going to Pharmacy.', self.nav.command(alias))
         self.update(0, 0)
         self.update(90)
         self.update(90, 1)
@@ -77,7 +77,7 @@ class CafeDemo(unittest.TestCase):
     def test_xray_aliases(self):
         for alias in ['x-ray', 'x ray', 'xray', 'radiology', 'radiation lab', 'imaging', 'lab']:
             with self.subTest(alias=alias):
-                self.assertIn('Starting route to X-ray.', self.nav.command(alias))
+                self.assertIn('Going to X-ray.', self.nav.command(alias))
 
 
 if __name__ == '__main__':

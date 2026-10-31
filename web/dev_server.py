@@ -1,4 +1,4 @@
-"""Mock JabCross server for phone-page development. Stdlib only.
+"""Mock AcuPath server for phone-page development. Stdlib only.
 
 Run: python3 web/dev_server.py   (serves web/ on http://localhost:8000)
 Then: cloudflared tunnel --url http://localhost:8000

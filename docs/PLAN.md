@@ -1,4 +1,4 @@
-# JabCross build plan
+# AcuPath build plan
 
 | Role | Who | Owns |
 |---|---|---|
@@ -15,7 +15,7 @@ pace control and pause/reset for filming. The phone map and API stay unchanged.
 
 - [x] Hospital walkthrough: first-person scene, filming controls, geometry checks and viewer reviews complete.
 - [x] Hospital visual polish: lighting/shadows, materials, mounted signs and room details; geometry checks, browser route and both reviews passed.
-- [ ] Publish the updated viewer to the existing website (requires Sites editor access).
+- [x] Publish the updated viewer to GitHub Pages.
 
 - **Jasper**: pause the viewer. Start `server/nav.py` (the navigator). Without it there is no product.
 - **Brian**: `pip install -r server/requirements.txt`, then `python server/live_depth.py` to check depth
@@ -171,6 +171,3 @@ and rerun it. Jasper adds three fields:
 | 3:45-4:15 | Film: blindfolded walker + spotter, screen recording of `/map/` |
 | 4:15-5:00 | Edit, written answers, final push |
 
-## Cleanup (low priority)
-
-- `tmp/pdfs/` is scratch from the viewer build and can be deleted.

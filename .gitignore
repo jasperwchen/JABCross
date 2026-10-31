@@ -5,3 +5,4 @@ __pycache__/
 
 # Isolated Sites source checkout; published separately from this repository.
 /sites/gsmst-viewer/
+CLAUDE.local.md
