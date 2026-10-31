@@ -1,127 +1,158 @@
 # JabCross build plan
 
-Three people, three pieces that meet at a small set of agreed interfaces. Agree on the interfaces
-below in the first 10 minutes, then everyone can work against fakes until integration.
+| Role | Who | Owns |
+|---|---|---|
+| A: perception + server | Brian | `server/app.py`, `server/perception.py` |
+| B: navigation + map | Jasper | `server/nav.py`, `demo/` (map data + 3D viewer) |
+| C: phone + voice + video | Ayan | `web/index.html`, tunnel, staging, video edit |
 
-## How the pieces fit
+## Do this now
+
+- **Jasper**: pause the viewer. Start `server/nav.py` (the navigator). Without it there is no product.
+- **Brian**: start installing PyTorch + transformers now (several GB). If it fails on your Python
+  version, make a Python 3.12 venv instead of debugging. Then the FastAPI skeleton.
+- **Ayan**: `brew install cloudflared`, then the phone page.
+- **Everyone, before 1:00**: walk the venue hallways together and pick the demo route.
+
+## Already done
+
+- 12 printed markers, IDs 0-11 (`markers/markers.pdf`)
+- 3D Grady viewer with simulated walk (`demo/`, Jasper)
+
+---
+
+## How it fits
 
 ```
-Phone (web page, worn on chest)            Laptop (Python, FastAPI)
-  camera frame + heading  --- POST /frame --->  perception.perceive(frame)   [A]
-                                                nav.Navigator.update(...)    [B]
-  speak text, play alert  <-- JSON reply ----
-  voice transcript        --- POST /command ->  nav.Navigator.command(text)  [B]
-  speak reply             <-- JSON reply ----
+PHONE (worn on chest)                  LAPTOP (one FastAPI server, one tunnel)
+  frame + heading  -- POST /frame ---->  perceive()  [Brian]  ->  navigator.update()  [Jasper]
+  speak + tone     <------ reply ------
+  voice text       -- POST /command -->  navigator.command()  [Jasper]
+  speak            <------ reply ------
+
+LAPTOP SCREEN (for the video)
+  /map/ viewer  -- GET /state every 1 s  -->  live dot on the Grady plan
+                -- GET /depth.jpg ------->  depth map in a corner
 ```
 
-The phone reaches the laptop through an HTTPS tunnel (`cloudflared tunnel --url http://localhost:8000`);
-phone browsers only allow camera access over HTTPS. FastAPI also serves the phone page.
+## Endpoints (all on the one server)
 
-## Repo layout
+| Route | Owner | What it does |
+|---|---|---|
+| `/` | Brian serves, Ayan builds | Phone page (`web/`) |
+| `/map/` | Brian serves, Jasper builds | 3D viewer (`demo/`). Keep the trailing slash: the viewer loads files by relative path. |
+| `POST /frame` | Brian | Form: `image` (JPEG, ~640 px wide), `heading` (float). Returns `{"speak": str or null, "alert": "none" or "warn" or "stop"}` |
+| `POST /command` | Brian | JSON `{"text": "take me to the lab"}`. Returns `{"speak": "..."}` |
+| `GET /state` | Brian | `{"node": "lobby", "marker": 1, "destination": "lab"}` from the navigator |
+| `GET /depth.jpg` | Brian | Latest depth map as a color image |
 
-```
-server/app.py        FastAPI routes, glue, serves web/              [A]
-server/perception.py depth model, marker detection, Jev experiment  [A]
-server/nav.py        routing + guidance logic                       [B]
-server/map.json      traced map of the Grady route                  [B]
-web/index.html       the phone page                                 [C]
-requirements.txt
-```
+FastAPI tip: register the API routes first, mount `/map` (from `demo/`), and mount `/` (from `web/`) last.
 
-## Interfaces (the contract)
+## Shared rules
 
-Conventions: distances in meters. Angles in degrees. Bearing and heading increase clockwise
-(turning right increases them). Negative bearing = left of center.
+- **Units**: distances in meters, angles in degrees.
+- **Direction**: heading and bearing increase clockwise. Negative bearing = left of center.
+- **Map axes**: the map's y axis points DOWN. Map heading of a hallway from a to b is
+  `atan2(bx - ax, -(by - ay))` in degrees, clockwise from map-up. Get this wrong and every turn is mirrored.
+- **Start**: the user starts at the entrance (marker 0), facing it. Any marker sighting overrides.
+- **Re-anchoring the gyroscope**: when marker M is seen at bearing b, the user's map heading is
+  `facing[M] - b`. Store the offset between that and the phone's gyro heading.
+- **One user**: one global navigator in `app.py`. No accounts.
 
-**POST /frame**: multipart form, `image` (JPEG, ~640px wide) and `heading` (float, clockwise
-degrees from the phone's gyroscope).
-Returns `{"speak": str | null, "alert": "none" | "warn" | "stop", "debug": {...}}`
+## The one map: `demo/grady-ground.json`
 
-**POST /command**: JSON `{"text": "take me to radiology"}`
-Returns `{"speak": "Starting route to Radiology. Turn right about 90 degrees."}`
+Both the viewer and the navigator read this file. Never edit it by hand; edit `demo/build_model.py`
+and rerun it. Jasper adds three fields:
 
-**perception.perceive(jpeg_bytes) -> dict**
+- **`aliases`** on each destination: what a person might say. `"lab": ["lab", "blood work", "lab waiting"]`
+- **`facing`** on each node: the map heading you face when looking straight at that node's marker.
+- **`steps`** as the third value of each edge, measured by walking the venue route. Placeholder 10
+  until measured. The current third value is drawing units (one corridor is 1,160), useless for speech.
+  The viewer's shortest-path code uses this value too; it still works.
+
+## Data the code passes around
+
+`perceive(jpeg_bytes)` returns:
 ```
 {
-  "view_ok": true,                                        # false if lens covered or pointing at floor
-  "obstacles": {"left": 2.4, "center": 0.9, "right": 3.1},  # nearest distance per third of the frame
+  "view_ok": true,                                          # false = lens covered / pointing at floor
+  "obstacles": {"left": 2.4, "center": 0.9, "right": 3.1},  # nearest meters per third of the frame
   "markers": [{"id": 3, "distance_m": 2.1, "bearing_deg": -12.0}],
-  "place": {"node": "j2", "confidence": 0.8}              # optional, Jev experiment only
+  "place": {"node": "j2", "confidence": 0.8}                # optional, Jev only
 }
 ```
 
-**nav.Navigator**
-- `command(text) -> str`: handles "take me to X", "where am I", "repeat", "stop", "cancel"
-- `update(perception, heading) -> {"speak": str | None, "alert": str}`
+`Navigator` (in `server/nav.py`):
+- `command(text) -> str`: "take me to X", "where am I", "repeat", "stop", "cancel"
+- `update(perception, heading) -> {"speak": str or None, "alert": str}`
+- `state() -> dict`: what `GET /state` returns
 
-**map.json**
-```
-{
-  "nodes": {
-    "entrance": {"name": "Main Entrance", "aliases": ["front door", "lobby"],
-                 "marker": 0, "facing": 0, "x": 0, "y": 0},
-    "j1":       {"name": "Hallway junction", "aliases": [], "marker": 1, "facing": 90, "x": 0, "y": 12}
-  },
-  "edges": [["entrance", "j1", 12]]
-}
-```
-`x`, `y` in steps on the traced plan (map up = 0 degrees). Edge = [from, to, steps]. `facing` is
-the map heading you face when looking straight at that node's marker; it lets nav re-anchor the
-gyroscope every time a marker is seen.
+---
 
-## Person A: perception + server
+## Brian (A): perception + server
 
-- [ ] 0:00-0:30 FastAPI skeleton: `/frame` and `/command` return a canned `speak`, `web/` served
-      statically. This unblocks C's end-to-end test.
-- [ ] Depth: Depth Anything V2 Metric Indoor Small (Hugging Face transformers, Mac GPU via MPS).
-      Nearest distance in left/center/right thirds, `view_ok` check. Measure frames per second.
-- [ ] Markers: OpenCV ArUco detection, distance and bearing per marker. Generate and print one
-      marker per map node.
-- [ ] Jev experiment (only once the above works): confirm someone has an API key in the first 15
-      minutes, or drop it. Choice question with the frame + nearby nodes as options. Test at the
-      demo junctions; keep it only if it is right most of the time. Fallback if no key: the same
-      question to Claude vision.
-- [ ] Debug image of the depth map for the video.
-- [ ] After freeze: one sourced statistic for the harm (blind patients and hospital wayfinding),
-      draft the written submission answers.
+- [ ] **By 0:30**: FastAPI skeleton with all routes above. `/frame` and `/command` return a canned
+      `speak`. Serves `web/` and `demo/`. This unblocks Ayan's first test.
+- [ ] **Depth**: Depth Anything V2 Metric Indoor Small (transformers, Mac GPU via MPS). Nearest
+      meters in left / center / right thirds of the frame. Measure frames per second.
+- [ ] **`view_ok`**: false when almost everything is closer than ~0.3 m (lens covered).
+- [ ] **Markers**: OpenCV ArUco, dictionary `DICT_4X4_50`, printed side **0.15 m**. Return distance
+      and bearing per marker.
+- [ ] **`/depth.jpg`**: save the latest depth frame as a color image.
+- [ ] **Jev (only after the above works)**: confirm someone has an API key in the first 15 min, or
+      drop it. Ask "which of these nearby junctions is this?" with the frame. Keep only if mostly
+      right at the demo junctions. No key: ask Claude vision the same question.
+- [ ] **After freeze**: one sourced statistic on blind patients and hospital wayfinding. Draft the
+      written submission answers.
 
-## Person B: navigation
+## Jasper (B): navigation + map
 
-- [ ] 0:00-0:45 Pick a short route on the Grady ground floor (main entrance off Jesse Hill Jr.
-      Drive, one or two turns, a department). Trace it into `map.json`. Room labels in the PDF are
-      not machine-readable, so read them by eye. Hard stop at 45 minutes: switch to a mock plan.
-- [ ] Navigator: route with shortest path, then guidance states:
-      orient ("turn right about 30 degrees" until within ~15 degrees of the hallway direction),
-      walk ("walk forward about N steps", corrections from marker bearing when one is visible),
-      stop for obstacles (center < ~1 m: "stop, obstacle ahead, more space on your left"),
-      arrive at node (marker < ~1.2 m: next leg or "you have arrived").
-- [ ] Speech pacing: priority stop > obstacle > turn > info, and never repeat the same line within
-      ~3 seconds, or the user drowns in audio.
-- [ ] Test against fake perception dicts before A's real perception is ready.
-- [ ] With C: lay out the venue route so its turns and distances match the traced slice.
-- [ ] Stretch: map view page with a live dot on the Grady plan, for the video.
+- [ ] **Start position + routing**: start at entrance (marker 0); shortest path to the destination
+      matched from `aliases`.
+- [ ] **Guidance, in this priority order** (highest wins when several apply):
+  1. `view_ok` false: "Camera blocked. Hold the phone flat against your chest."
+  2. Center obstacle under ~1 m: "Stop. Obstacle ahead. More space on your left."
+  3. Facing more than ~15 degrees off the hallway: "Turn right about 30 degrees."
+  4. Marker of the next node under ~1.2 m: next leg, or "You have arrived at the lab."
+  5. Walking: "Walk forward about 12 steps", with small corrections from marker bearing.
+- [ ] **Pacing**: never repeat the same line within ~3 s. The user must not drown in audio.
+- [ ] **Test without Brian**: feed fake perception dicts until real perception lands.
+- [ ] **Map fields**: add `aliases`, `facing`, `steps` in `build_model.py`.
+- [ ] **By 1:00, with Ayan**: adjust the chosen route's node positions so its turns match the venue's
+      hallways. The navigator takes turn angles from the map, so a mismatch gives wrong directions on camera.
+- [ ] **Viewer, live**: poll `GET /state` every 1 s and call `setMarker` when the node changes.
+      Show `/depth.jpg` in a corner, refreshed every ~0.5 s.
 
-## Person C: phone + voice + video
+## Ayan (C): phone + voice + video
 
-- [ ] 0:00-0:30 Phone page behind the tunnel: one full-screen "tap to start" (grants camera,
-      microphone, motion), sends a frame every ~300 ms to `/frame`, speaks `speak` with the
-      browser's built-in speech. Checkpoint: phone speaks A's canned reply.
-- [ ] Keep the screen awake (Wake Lock API); a locked screen kills the camera.
-- [ ] Heading: device orientation events (iPhone needs a permission request on the start tap).
+- [ ] **By 0:30**: phone page behind the tunnel (`cloudflared tunnel --url http://localhost:8000`).
+      One full-screen "tap to start" (grants camera, mic, motion). Send a frame every ~300 ms to
+      `/frame`, speak `speak` with browser speech. **Checkpoint: the phone speaks Brian's canned reply.**
+- [ ] **Screen awake**: Wake Lock API. A locked screen kills the camera.
+- [ ] **Heading**: device orientation events (iPhone needs a permission request on the start tap).
       Convert to clockwise degrees before sending.
-- [ ] Voice control, so the app runs itself: on start, ask "Where would you like to go?", send the
-      transcript to `/command`, start guidance automatically. Browser speech recognition
-      (webkitSpeechRecognition); pause listening while the app is talking or it hears itself.
-      If continuous listening is flaky on iPhone, fall back to "tap anywhere to talk".
-- [ ] Alerts as audio tones (Web Audio). iPhone Safari does not support vibration.
-- [ ] Staging: print department signs matching the Grady route, tape up markers from A.
-- [ ] Lead filming and editing. Hook line first: "Google Maps for hospitals."
+- [ ] **Voice, so the app runs itself**: on start say "Where would you like to go?", send the
+      transcript to `/command`, guidance starts automatically. Pause listening while the app talks,
+      or it hears itself. If continuous listening is flaky on iPhone, use "tap anywhere to talk".
+- [ ] **Alerts as tones** (Web Audio). iPhone Safari cannot vibrate.
+- [ ] **By 1:00, with Jasper**: pick the venue route. Then print department signs that match it and
+      tape markers at chest height (write the location on each sheet).
+- [ ] **Video**: lead filming and the edit. Open with "Google Maps for hospitals."
+
+---
 
 ## Timeline
 
-- 0:30 checkpoint: phone sends a frame through the tunnel and speaks the server's reply
-- 2:00 integrate: real perception + real nav on the venue route
-- 2:30 one full route works end to end
-- 3:45 feature freeze
-- 3:45-4:15 film (blindfolded walker, spotter, screen recordings of depth map and map view)
-- 4:15-5:00 edit, written answers, final push
+| Time | Milestone |
+|---|---|
+| 0:30 | Phone speaks the server's canned reply through the tunnel |
+| 1:00 | Venue route picked, map adjusted, markers taped up |
+| 2:00 | Real perception + real navigator wired together |
+| 2:30 | One full route works end to end |
+| 3:45 | **Feature freeze** |
+| 3:45-4:15 | Film: blindfolded walker + spotter, screen recording of `/map/` |
+| 4:15-5:00 | Edit, written answers, final push |
+
+## Cleanup (low priority)
+
+- `tmp/pdfs/` is scratch from the viewer build and can be deleted.
