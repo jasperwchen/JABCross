@@ -17,3 +17,6 @@ In `demo/build_model.py`, then rerun it:
 - Edge steps: 7 each for now (5 m); Ayan will count and send real numbers.
 - Names (FINAL, signs are printed): m0 "Entrance", m1 "Lobby", m2 "Pharmacy", m3 "X-ray". Destinations: pharmacy, xray. Aliases: pharmacy -> "pharmacy", "medicine", "prescription"; xray -> "x-ray", "x ray", "xray", "radiology", "radiation lab", "imaging". "lab" can also route to X-ray.
 - Test with fake perception, markers 0,1,2,3 in order, starting heading 0. Expect: "turn right ~90", walk, "turn left ~90", walk, walk, "You have arrived at X-ray."
+
+## Ayan (C) -> Jasper (B): Ayan's agent is editing server/nav.py speech pacing (now)
+Approved by Ayan: event-based messages instead of 3 s repeats (turn hysteresis 30/15 deg, obstacle speaks once then beeps only, arrival + next turn in one line). Will touch only speech/pacing logic in nav.py + test_nav.py. Please avoid editing nav.py until it lands; map changes in build_model.py are fine.
