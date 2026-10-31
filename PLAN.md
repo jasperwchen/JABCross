@@ -9,8 +9,8 @@
 ## Do this now
 
 - **Jasper**: pause the viewer. Start `server/nav.py` (the navigator). Without it there is no product.
-- **Brian**: start installing PyTorch + transformers now (several GB). If it fails on your Python
-  version, make a Python 3.12 venv instead of debugging. Then the FastAPI skeleton.
+- **Brian**: `pip install -r requirements.txt`, then `python server/live_depth.py` to check depth
+  and markers on the laptop webcam, then `python server/app.py` behind the tunnel.
 - **Ayan**: `brew install cloudflared`, then the phone page.
 - **Everyone, before 1:00**: walk the venue hallways together and pick the demo route.
 
@@ -91,14 +91,16 @@ and rerun it. Jasper adds three fields:
 
 ## Brian (A): perception + server
 
-- [ ] **By 0:30**: FastAPI skeleton with all routes above. `/frame` and `/command` return a canned
+- [x] **By 0:30**: FastAPI skeleton with all routes above. `/frame` and `/command` return a canned
       `speak`. Serves `web/` and `demo/`. This unblocks Ayan's first test.
-- [ ] **Depth**: Depth Anything V2 Metric Indoor Small (transformers, Mac GPU via MPS). Nearest
-      meters in left / center / right thirds of the frame. Measure frames per second.
-- [ ] **`view_ok`**: false when almost everything is closer than ~0.3 m (lens covered).
-- [ ] **Markers**: OpenCV ArUco, dictionary `DICT_4X4_50`, printed side **0.15 m**. Return distance
+- [x] **Depth**: Ultralytics YOLO26 depth (`yolo26n-depth.pt`, Mac GPU via MPS). Nearest meters in
+      left / center / right thirds, above the bottom quarter (floor). Measure frames per second on the Mac.
+      Absolute meters are uncalibrated: check them against a tape measure with `server/live_depth.py`.
+- [x] **`view_ok`**: false when the frame is nearly uniform (lens covered). The depth model alone
+      cannot tell: it predicts a smooth ~1 m wall for a covered lens.
+- [x] **Markers**: OpenCV ArUco, dictionary `DICT_4X4_50`, printed side **0.15 m**. Return distance
       and bearing per marker.
-- [ ] **`/depth.jpg`**: save the latest depth frame as a color image.
+- [x] **`/depth.jpg`**: save the latest depth frame as a color image.
 - [ ] **Jev (only after the above works)**: confirm someone has an API key in the first 15 min, or
       drop it. Ask "which of these nearby junctions is this?" with the frame. Keep only if mostly
       right at the demo junctions. No key: ask Claude vision the same question.

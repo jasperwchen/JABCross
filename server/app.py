@@ -3,7 +3,6 @@
 Run from the repo root: python server/app.py   then: cloudflared tunnel --url http://localhost:8000
 """
 
-import time
 from pathlib import Path
 
 import cv2
@@ -12,44 +11,28 @@ from fastapi import FastAPI, File, Form, Response, UploadFile
 from fastapi.staticfiles import StaticFiles
 
 import perception
+from nav import Navigator
 
 ROOT = Path(__file__).resolve().parent.parent
 app = FastAPI()
-last_line, last_line_t = None, 0.0
-
-
-def obstacle_reply(p):
-    """Stand-in for navigator.update(p, heading) until server/nav.py exists: obstacle warnings only."""
-    global last_line, last_line_t
-    if not p["view_ok"]:
-        line, alert = "Camera blocked. Hold the phone flat against your chest.", "warn"
-    elif p["obstacles"]["center"] < 1.0:
-        side = "left" if p["obstacles"]["left"] > p["obstacles"]["right"] else "right"
-        line, alert = f"Stop. Obstacle ahead. More space on your {side}.", "stop"
-    else:
-        return {"speak": None, "alert": "none"}
-    if line == last_line and time.monotonic() - last_line_t < 3:  # never repeat a line within ~3 s
-        line = None
-    else:
-        last_line, last_line_t = line, time.monotonic()
-    return {"speak": line, "alert": alert}
+navigator = Navigator()  # one user, one global navigator
 
 
 # Plain def (not async): FastAPI runs it in a worker thread, so inference does not block other routes.
 @app.post("/frame")
 def frame(image: UploadFile = File(...), heading: float = Form(...)):
     p = perception.perceive(image.file.read())
-    return {**obstacle_reply(p), "debug": p}
+    return {**navigator.update(p, heading), "debug": p}
 
 
 @app.post("/command")
 def command(body: dict):
-    return {"speak": f"Starting route to {body.get('text', '')}"}
+    return {"speak": navigator.command(body.get("text", ""))}
 
 
 @app.get("/state")
 def state():
-    return {"node": "entrance", "marker": 0, "destination": None}
+    return navigator.state()
 
 
 @app.get("/depth.jpg")

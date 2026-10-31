@@ -64,9 +64,10 @@ shared endpoint/data shape with the user before implementing them.
   Consult these for background without overriding the current shared build plan.
 - `web/` may contain in-progress local work. Inspect it without overwriting it.
   The phone mock server is independent of the planned real server.
-- At the time these instructions were written, `server/` was not present in the
-  checkout. Do not assume the real server, navigator, or live viewer integration
-  exists merely because it appears in `PLAN.md`.
+- `server/app.py` is the real server (`python server/app.py`); `server/perception.py`
+  runs the Ultralytics YOLO26 depth model and ArUco detection; `server/live_depth.py`
+  runs the same perception on the laptop webcam. Install with `requirements.txt`.
+  Do not assume the live viewer integration exists merely because it appears in `PLAN.md`.
 
 No accounts, scheduling, reviews, caregiver requests, or additional disability
 features are in scope. Jev markerless localization is optional, only after the
