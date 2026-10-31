@@ -1,0 +1,5 @@
+# Server (server/). Tested with Python 3.13. ultralytics pulls in torch and opencv-python.
+ultralytics==8.4.194
+fastapi==0.162.0
+uvicorn==0.54.0
+python-multipart==0.0.33

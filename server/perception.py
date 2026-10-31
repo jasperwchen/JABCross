@@ -15,9 +15,8 @@ from ultralytics.utils.plotting import colorize_depth
 DEVICE = "mps" if torch.backends.mps.is_available() else 0 if torch.cuda.is_available() else "cpu"
 MODEL = YOLO("yolo26n-depth.pt")  # downloads on first use; predicts at its trained 768 px. s/m/l/x: slower, more accurate
 
-BLOCKED_M = 0.3  # view_ok is false when most of the frame is closer than this (lens covered)
-BLOCKED_FRACTION = 0.8
-DARK_LEVEL = 15  # mean gray level below this also counts as a covered lens
+MIN_CONTRAST = 10  # view_ok is false below this gray-level std: lens covered or pressed against something
+FLOOR_FRACTION = 0.25  # bottom of the frame is floor on a chest-worn phone; it reads as an obstacle when tilted
 NEAR_PERCENTILE = 5  # "nearest" distance per third, ignoring the closest few percent as noise
 
 MARKER_SIDE_M = 0.15  # printed black square, markers/markers.pdf
@@ -36,12 +35,12 @@ def perceive(jpeg_bytes):
     result = MODEL.predict(frame, device=DEVICE, verbose=False)[0]
     depth = result.depth.data.cpu().numpy()  # (H, W) meters, same size as the frame
 
-    thirds = np.array_split(depth, 3, axis=1)
+    thirds = np.array_split(depth[: round(depth.shape[0] * (1 - FLOOR_FRACTION))], 3, axis=1)
     obstacles = {
         side: round(float(np.percentile(third, NEAR_PERCENTILE)), 2)
         for side, third in zip(("left", "center", "right"), thirds)
     }
-    view_ok = bool(gray.mean() > DARK_LEVEL and (depth < BLOCKED_M).mean() < BLOCKED_FRACTION)
+    view_ok = bool(gray.std() > MIN_CONTRAST)  # the model still predicts a smooth ~1 m wall for a covered lens
 
     latest_depth_image = draw_depth(depth, obstacles)
     return {"view_ok": view_ok, "obstacles": obstacles, "markers": find_markers(gray)}
@@ -59,20 +58,22 @@ def find_markers(gray):
         markers.append(
             {
                 "id": int(marker_id),
-                "distance_m": round(focal * MARKER_SIDE_M / side_px, 2),
-                "bearing_deg": round(math.degrees(math.atan((quad[:, 0].mean() - w / 2) / focal)), 1),
+                "distance_m": round(float(focal * MARKER_SIDE_M / side_px), 2),
+                "bearing_deg": round(math.degrees(math.atan(float(quad[:, 0].mean() - w / 2) / focal)), 1),
             }
         )
     return markers
 
 
 def draw_depth(depth, obstacles):
-    """Colorized depth (near = warm) with the three obstacle zones and their nearest distances."""
+    """Colorized depth (near = warm) with the three obstacle zones above the ignored floor band, and their distances."""
     image = colorize_depth(depth)
     h, w = depth.shape
+    floor_y = round(h * (1 - FLOOR_FRACTION))
+    cv2.line(image, (0, floor_y), (w, floor_y), (255, 255, 255), 2)
     for i, side in enumerate(("left", "center", "right")):
         x = w * i // 3
         if i:
-            cv2.line(image, (x, 0), (x, h), (255, 255, 255), 2)
+            cv2.line(image, (x, 0), (x, floor_y), (255, 255, 255), 2)
         cv2.putText(image, f"{obstacles[side]:.1f} m", (x + 10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.1, (255, 255, 255), 3)
     return image

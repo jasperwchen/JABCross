@@ -1,3 +1,4 @@
 docs/jabcross_a5logs.txt
 .venv/
 *.pt
+__pycache__/
