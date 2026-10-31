@@ -10,64 +10,53 @@ questions. Judging happens through the video; the codebase only needs to be gene
 
 ## Pitch
 
-Google Maps for hospitals. A patient says where they need to go ("take me to Radiology") and the
-app walks them there with spoken, real-time directions: "turn right about 30 degrees", "walk
-forward about 12 steps", "stop", "obstacle ahead on your left", "you have arrived".
+Google Maps for hospitals, built first for blind and low-vision patients. The patient says where
+they need to go ("take me to Radiology") and the app walks them there with spoken, real-time
+directions: "turn right about 30 degrees", "walk forward about 12 steps", "stop", "obstacle ahead
+on your left", "you have arrived".
 
-First focus: blind and low-vision patients. The phone is worn on the chest, camera facing forward.
-A depth model watches the path ahead for obstacles and checks the camera has a usable view.
+The phone is worn on the chest, camera facing forward. A depth model watches the path ahead for
+obstacles and checks the camera has a usable view.
+
+The app is fully voice-operated. After one tap to start (the phone requires a tap before it allows
+camera, microphone and motion access), the user never has to find a button: they say where they
+want to go and the app sets up and starts the route itself.
 
 Decided:
-- One core feature (hospital navigation), not a multi-feature hub
+- One core feature: hospital navigation for blind patients
+- Voice-only operation is the one extension in scope
 - No BetterBell code; accounts are hardcoded
-- Security is out of scope (proof of concept)
+- Map source: Grady Memorial Hospital base plans (GRADY-HOSPITAL-BASE-PLANS-02.17.22.pdf).
+  If tracing it takes too long, use a mock floor plan; this is a proof of concept.
+- Security is out of scope
 
 ## The hard problem: knowing where the user is
 
-Indoors there is no GPS and no map, and depth detection alone does not say where you are.
-Proposed approach:
-- **Building map**: a hand-built graph of junctions and destinations. Each hallway edge stores a
-  direction and an approximate step count.
+Indoors there is no GPS, and depth detection alone does not say where you are.
+
+- **Building map**: a hand-traced graph of junctions and destinations from the Grady ground floor.
 - **Printed markers at each junction and destination** (ArUco codes: black-and-white squares that
-  OpenCV can detect and measure). When the camera sees one, we know where the user is, how far
-  away the marker is, and the angle to it, which drives "angle a bit left" corrections.
+  OpenCV can detect and measure). Seeing one tells us where the user is, how far away the marker
+  is, and the angle to it, which drives "angle a bit left" corrections and "stop" on arrival.
   Real-world precedent: NaviLens codes are already used in transit for blind riders.
 - **Phone gyroscope** for turns between markers ("turn left 90 degrees" = change in heading).
 - **Depth model** for obstacles and "bad view" warnings.
-
-## Architecture
-
-- **Phone (browser page, worn on chest)**: sends camera frames to the server, speaks
-  instructions, vibrates on danger, reads the gyroscope, takes the destination by voice.
-- **Laptop server (Python, FastAPI)**:
-  - Depth model (Depth Anything V2 Metric Indoor, small) -> nearest obstacle in left / center / right
-  - Marker detection (OpenCV ArUco) -> current position, distance and bearing to marker
-  - Route planner + guidance logic -> next spoken instruction
-- **HTTPS tunnel** (cloudflared or ngrok): phone browsers only allow camera access over HTTPS.
-
-## Team split
-
-- **A, perception**: depth model + marker detection, one endpoint that takes a frame and returns
-  obstacles and markers seen.
-- **B, navigation**: building map, routing, guidance logic, matching the spoken destination.
-- **C, phone + demo**: phone page, tunnel, mapping the venue, printing markers and signs, video.
-
-## Timeline
-
-- 0:30 end-to-end spike: phone sends a frame, server replies, phone speaks it
-- 2:30 one full route works (entrance -> one turn -> obstacle -> destination)
-- 3:45 feature freeze
-- 4:00-5:00 film and edit
+- **Markerless experiment (Jev)**: Jev is TypeSafe AI's decision model. It answers typed questions
+  (pick one of N options, a score, yes/no) instead of writing text, and it has experimental image
+  input. Ask it "which of these map locations is this camera looking at?" with the camera frame and
+  the nearby junctions as options. If it is reliable at our demo junctions, we pitch "no stickers
+  needed". Markers stay as the reliable path for the demo either way.
 
 ## Demo plan
 
-Stage the venue as a hospital: paper department signs, markers at junctions, one route with a turn
-and a chair in the way. A blindfolded teammate wears the phone, with a spotter. In the edit, show
-the depth map and a map view with the user's position next to the live footage.
+Pick one short route on the Grady ground floor (main entrance, one or two turns, a department).
+Recreate its turns at the venue with matching paper department signs and markers, so the map view
+and the footage agree. A blindfolded teammate wears the phone, with a spotter. In the edit, show
+the depth map and a live dot on the Grady plan next to the footage.
 
 ## Not building (roadmap slide only)
 
 Reviews, scheduling with a doctor, service requests, routing for other disabilities
 (e.g. step-free routes for wheelchair users).
-Stretch if ahead of schedule: destination suggested from a hardcoded appointment
-("You have Radiology at 2pm. Go there?").
+
+Who does what, interfaces, and the timeline: see PLAN.md.
