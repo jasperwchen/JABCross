@@ -9,7 +9,7 @@
 ## Do this now
 
 - **Jasper**: pause the viewer. Start `server/nav.py` (the navigator). Without it there is no product.
-- **Brian**: `pip install -r requirements.txt`, then `python server/live_depth.py` to check depth
+- **Brian**: `pip install -r server/requirements.txt`, then `python server/live_depth.py` to check depth
   and markers on the laptop webcam, then `python server/app.py` behind the tunnel.
 - **Ayan**: `brew install cloudflared`, then the phone page.
 - **Everyone, before 1:00**: walk the venue hallways together and pick the demo route.
