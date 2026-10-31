@@ -107,17 +107,17 @@ and rerun it. Jasper adds three fields:
 
 ## Jasper (B): navigation + map
 
-- [ ] **Start position + routing**: start at entrance (marker 0); shortest path to the destination
+- [x] **Start position + routing**: start at entrance (marker 0); shortest path to the destination
       matched from `aliases`.
-- [ ] **Guidance, in this priority order** (highest wins when several apply):
+- [x] **Guidance, in this priority order** (highest wins when several apply):
   1. `view_ok` false: "Camera blocked. Hold the phone flat against your chest."
   2. Center obstacle under ~1 m: "Stop. Obstacle ahead. More space on your left."
   3. Facing more than ~15 degrees off the hallway: "Turn right about 30 degrees."
   4. Marker of the next node under ~1.2 m: next leg, or "You have arrived at the lab."
   5. Walking: "Walk forward about 12 steps", with small corrections from marker bearing.
-- [ ] **Pacing**: never repeat the same line within ~3 s. The user must not drown in audio.
-- [ ] **Test without Brian**: feed fake perception dicts until real perception lands.
-- [ ] **Map fields**: add `aliases`, `facing`, `steps` in `build_model.py`.
+- [x] **Pacing**: never repeat the same line within ~3 s. The user must not drown in audio.
+- [x] **Test without Brian**: feed fake perception dicts until real perception lands.
+- [x] **Map fields**: add `aliases`, `facing`, `steps` in `build_model.py`.
 - [ ] **By 1:00, with Ayan**: adjust the chosen route's node positions so its turns match the venue's
       hallways. The navigator takes turn angles from the map, so a mismatch gives wrong directions on camera.
 - [ ] **Viewer, live**: poll `GET /state` every 1 s and call `setMarker` when the node changes.
@@ -128,13 +128,13 @@ and rerun it. Jasper adds three fields:
 - [ ] **By 0:30**: phone page behind the tunnel (`cloudflared tunnel --url http://localhost:8000`).
       One full-screen "tap to start" (grants camera, mic, motion). Send a frame every ~300 ms to
       `/frame`, speak `speak` with browser speech. **Checkpoint: the phone speaks Brian's canned reply.**
-- [ ] **Screen awake**: Wake Lock API. A locked screen kills the camera.
-- [ ] **Heading**: device orientation events (iPhone needs a permission request on the start tap).
+- [x] **Screen awake**: Wake Lock API. A locked screen kills the camera.
+- [x] **Heading**: device orientation events (iPhone needs a permission request on the start tap).
       Convert to clockwise degrees before sending.
-- [ ] **Voice, so the app runs itself**: on start say "Where would you like to go?", send the
+- [x] **Voice, so the app runs itself**: on start say "Where would you like to go?", send the
       transcript to `/command`, guidance starts automatically. Pause listening while the app talks,
       or it hears itself. If continuous listening is flaky on iPhone, use "tap anywhere to talk".
-- [ ] **Alerts as tones** (Web Audio). iPhone Safari cannot vibrate.
+- [x] **Alerts as tones** (Web Audio). iPhone Safari cannot vibrate.
 - [ ] **By 1:00, with Jasper**: pick the venue route. Then print department signs that match it and
       tape markers at chest height (write the location on each sheet).
 - [ ] **Video**: lead filming and the edit. Open with "Google Maps for hospitals."
